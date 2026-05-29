@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  RESEARCHER
+  STUDENT
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  fullName  String
+  email     String   @unique
+  password  String?
+  role      UserRole @default(STUDENT)
+
+  bookmarks Bookmark[]
+  reports   Report[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Paper {
+  id              String  @id @default(uuid())
+  title           String
+  abstract        String?
+  doi             String? @unique
+  publicationYear Int?
+  citationCount   Int     @default(0)
+  sourceUrl       String?
+  sourceProvider  String?
+
+  journalId String?
+  journal   Journal? @relation(fields: [journalId], references: [id])
+
+  authors   PaperAuthor[]
+  keywords  PaperKeyword[]
+  bookmarks Bookmark[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Author {
+  id   String @id @default(uuid())
+  name String
+
+  papers PaperAuthor[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Journal {
+  id        String  @id @default(uuid())
+  name      String  @unique
+  publisher String?
+
+  papers Paper[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Keyword {
+  id   String @id @default(uuid())
+  name String @unique
+
+  papers PaperKeyword[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bookmark {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  paperId String
+  paper   Paper  @relation(fields: [paperId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, paperId])
+}
+
+model Report {
+  id      String  @id @default(uuid())
+  title   String
+  content String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PaperAuthor {
+  paperId  String
+  authorId String
+
+  paper  Paper  @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([paperId, authorId])
+}
+
+model PaperKeyword {
+  paperId   String
+  keywordId String
+
+  paper   Paper   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  keyword Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@id([paperId, keywordId])
+}

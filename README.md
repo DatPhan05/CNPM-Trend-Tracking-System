@@ -1,1 +1,8 @@
-# C-ng-ngh-ph-n-m-m
+# Scientific Journal Publication Trend Tracking System
+
+---
+
+## Table of Contents
+
+---
+

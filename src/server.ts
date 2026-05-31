@@ -6,6 +6,8 @@ import authRoutes from "./routes/auth.routes";
 import adminRoutes from "./routes/admin.routes";
 import userRoutes from "./routes/user.routes";
 import settingRoutes from "./routes/setting.routes";
+import crawlerRoutes from "./routes/crawler.routes";
+import paperRoutes from "./routes/paper.routes";
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/settings", settingRoutes);
+app.use("/api/crawler", crawlerRoutes);
+app.use("/api/papers", paperRoutes);
 
 const PORT = process.env.PORT || 8080;
 

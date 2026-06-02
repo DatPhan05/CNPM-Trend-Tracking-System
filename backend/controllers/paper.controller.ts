@@ -2,6 +2,23 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import axios from "axios";
 
+// Helper function to reconstruct OpenAlex abstract
+function reconstructAbstract(invertedIndex: any): string {
+  if (!invertedIndex) return "";
+  const words: string[] = [];
+  try {
+    for (const word of Object.keys(invertedIndex)) {
+      const positions = invertedIndex[word];
+      for (const pos of positions) {
+        words[pos] = word;
+      }
+    }
+  } catch (e) {
+    return "";
+  }
+  return words.filter(Boolean).join(" ");
+}
+
 export const getPapers = async (req: Request, res: Response): Promise<void> => {
   try {
     const query = (req.query.query as string) || "";
@@ -67,16 +84,54 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
       },
     });
 
-    res.json({ success: true, papers });
+    res.json({ success: true, message: "Get papers successfully", papers });
   } catch (error: any) {
     console.error("❌ getPapers error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+export const getPaperById = async (req: Request, res: Response) => {
+  try {
+    const id = String(req.params.id);
+
+    const paper = await prisma.paper.findUnique({
+      where: { id },
+      include: {
+        journal: true,
+        authors: {
+          include: {
+            author: true,
+          },
+        },
+        keywords: {
+          include: {
+            keyword: true,
+          },
+        },
+      },
+    });
+
+    if (!paper) {
+      return res.status(404).json({
+        message: "Paper not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Get paper successfully",
+      paper,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error,
+    });
+  }
+};
+
 export const getTrends = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Calculate total statistics
     const totalPapers = await prisma.paper.count();
     const totalJournals = await prisma.journal.count();
     const totalKeywords = await prisma.keyword.count();
@@ -88,7 +143,6 @@ export const getTrends = async (req: Request, res: Response): Promise<void> => {
     });
     const totalCitations = citationAgg._sum.citationCount || 0;
 
-    // Top Keywords Ranking
     const keywordsWithCounts = await prisma.keyword.findMany({
       select: {
         id: true,
@@ -127,23 +181,6 @@ export const getTrends = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Helper function to reconstruct OpenAlex abstract
-function reconstructAbstract(invertedIndex: any): string {
-  if (!invertedIndex) return "";
-  const words: string[] = [];
-  try {
-    for (const word of Object.keys(invertedIndex)) {
-      const positions = invertedIndex[word];
-      for (const pos of positions) {
-        words[pos] = word;
-      }
-    }
-  } catch (e) {
-    return "";
-  }
-  return words.filter(Boolean).join(" ");
-}
-
 export const searchPapers = async (req: Request, res: Response): Promise<void> => {
   try {
     const keyword = (req.query.keyword as string) || "";
@@ -172,7 +209,6 @@ export const searchPapers = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // Default: local mock data from Prisma database
     console.log(`🔍 Searching local database for keyword: "${keyword}"`);
     const whereClause: any = {};
     if (keyword) {

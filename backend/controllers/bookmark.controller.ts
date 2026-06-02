@@ -3,7 +3,7 @@ import prisma from "../lib/prisma";
 
 export const getBookmarks = async (req: any, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.user?.userId;
     if (!userId) {
       res.status(401).json({ success: false, message: "Unauthorized." });
       return;
@@ -35,7 +35,7 @@ export const getBookmarks = async (req: any, res: Response): Promise<void> => {
 
 export const addBookmark = async (req: any, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.user?.userId;
     const { paperId } = req.body;
 
     if (!userId || !paperId) {
@@ -60,7 +60,7 @@ export const addBookmark = async (req: any, res: Response): Promise<void> => {
 
 export const removeBookmark = async (req: any, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.user?.userId;
     const { paperId } = req.body;
 
     if (!userId || !paperId) {

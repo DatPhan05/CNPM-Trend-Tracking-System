@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../server";
+import app from "../app";
 import prisma from "../lib/prisma";
 
 describe("🧪 API Integration & Endpoint Unit Tests", () => {
@@ -67,7 +67,7 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
           password: "password123",
         });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
       expect(res.body.success).toBe(false);
     });
 

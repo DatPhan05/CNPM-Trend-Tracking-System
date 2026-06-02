@@ -9,8 +9,34 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": "./",
-    "types": ["node"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["src/**/*", "prisma.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "backend/**/*",
+    "prisma.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "frontend"
+  ]
 }

@@ -1,5 +1,5 @@
 import { UserRole } from "@prisma/client";
-import prisma from "../src/lib/prisma";
+import prisma from "../backend/lib/prisma";
 
 async function main() {
   console.log("🌱 Bắt đầu tạo dữ liệu mẫu (Seeding)...");

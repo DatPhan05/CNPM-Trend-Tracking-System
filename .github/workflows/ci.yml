@@ -13,8 +13,11 @@ on:
 jobs:
   basic-check:
     runs-on: ubuntu-latest
+
     env:
-      DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+      DATABASE_URL: postgresql://admin:admin123@localhost:5432/scientific_trend_db
+      JWT_SECRET: trendscholar_secret_key
+      PORT: 8080
 
     steps:
       - name: Checkout source code
@@ -30,7 +33,7 @@ jobs:
         run: npm install
 
       - name: Generate Prisma Client
-        run: npm run db:generate
+        run: npx prisma generate
 
       - name: Run test
         run: npm test

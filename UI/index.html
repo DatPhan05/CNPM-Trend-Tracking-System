@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SciPub Trends System</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Application navigation">
+        <a class="brand" href="#" data-view="dashboard" aria-label="SciPub Trends home">
+          <span class="brand-mark">ST</span>
+          <span>
+            <strong>SciPub Trends</strong>
+            <small>Publication Trend Tracking</small>
+          </span>
+        </a>
+
+        <div class="role-switcher" aria-label="Role selector">
+          <button class="role-button active" type="button" data-role="researcher">Researcher</button>
+          <button class="role-button" type="button" data-role="editor">Editor</button>
+          <button class="role-button" type="button" data-role="admin">Admin</button>
+        </div>
+
+        <nav class="nav-list" aria-label="Main">
+          <button class="nav-item active" type="button" data-view="dashboard" data-roles="researcher admin editor">
+            <span class="nav-icon" aria-hidden="true">D</span>
+            View Dashboard
+          </button>
+          <button class="nav-item" type="button" data-view="search" data-roles="researcher editor">
+            <span class="nav-icon" aria-hidden="true">S</span>
+            Search Journals
+          </button>
+          <button class="nav-item" type="button" data-view="trends" data-roles="researcher editor">
+            <span class="nav-icon" aria-hidden="true">T</span>
+            Analyze Trends
+          </button>
+          <button class="nav-item" type="button" data-view="saved" data-roles="researcher">
+            <span class="nav-icon" aria-hidden="true">Q</span>
+            Saved Searches
+          </button>
+          <button class="nav-item" type="button" data-view="editor" data-roles="editor admin">
+            <span class="nav-icon" aria-hidden="true">J</span>
+            Manage Journals
+          </button>
+          <button class="nav-item" type="button" data-view="admin" data-roles="admin">
+            <span class="nav-icon" aria-hidden="true">A</span>
+            Manage Users
+          </button>
+          <button class="nav-item" type="button" data-view="system" data-roles="admin">
+            <span class="nav-icon" aria-hidden="true">C</span>
+            Configure System
+          </button>
+        </nav>
+
+        <section class="sidebar-panel" aria-label="System summary">
+          <span class="panel-label">System Boundary</span>
+          <strong>7 use cases</strong>
+          <small>Journal, Article, Field, TrendData, SavedSearch</small>
+        </section>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Scientific Journal Publication Trend Tracking System</p>
+            <h1 id="pageTitle">Research intelligence workspace</h1>
+          </div>
+          <div class="user-chip" aria-label="Current user">
+            <span id="activeRole">Researcher</span>
+            <strong>User</strong>
+          </div>
+        </header>
+
+        <section class="hero-band">
+          <div>
+            <p class="eyebrow">UML-driven interface</p>
+            <h2>Track journals, articles, fields, saved searches, and publication trends in one workflow.</h2>
+          </div>
+          <div class="hero-actions">
+            <button class="primary-action" type="button" data-view-jump="search">Search Journals</button>
+            <button class="secondary-action" type="button" data-view-jump="trends">Generate Report</button>
+          </div>
+        </section>
+
+        <section class="view active" id="dashboardView" data-title="Research intelligence workspace">
+          <div class="metric-grid" aria-label="Dashboard metrics">
+            <article class="metric-card">
+              <span>Total Journals</span>
+              <strong>1,248</strong>
+              <small>+82 indexed this quarter</small>
+            </article>
+            <article class="metric-card">
+              <span>Articles Tracked</span>
+              <strong>248,930</strong>
+              <small>Publication count from TrendData</small>
+            </article>
+            <article class="metric-card">
+              <span>Citations</span>
+              <strong>4.7M</strong>
+              <small>Citation count across fields</small>
+            </article>
+            <article class="metric-card">
+              <span>Saved Searches</span>
+              <strong>34</strong>
+              <small>Researcher-owned queries</small>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel wide">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Analyze Trends</p>
+                  <h2>Publication and citation growth</h2>
+                </div>
+                <select id="metricSelect" aria-label="Trend metric">
+                  <option value="publicationCount">Publications</option>
+                  <option value="citationCount">Citations</option>
+                </select>
+              </div>
+              <div class="chart" id="trendChart" aria-label="Trend data chart"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Analyze Field Data</p>
+                  <h2>Field momentum</h2>
+                </div>
+              </div>
+              <div class="field-list" id="fieldList"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="searchView" data-title="Search journals and inspect details">
+          <div class="toolbar">
+            <label class="search-box">
+              <span aria-hidden="true">S</span>
+              <input id="journalSearch" type="search" placeholder="Search by title, field, or keyword" />
+            </label>
+            <select id="fieldFilter" aria-label="Filter by field">
+              <option value="all">All fields</option>
+            </select>
+            <button class="primary-action" type="button" id="saveSearchButton">Save Search</button>
+          </div>
+
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Search Journals</p>
+                  <h2>Journal results</h2>
+                </div>
+              </div>
+              <div class="journal-list" id="journalList"></div>
+            </section>
+
+            <section class="panel detail-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">View Journal Details</p>
+                  <h2 id="detailTitle">Select a journal</h2>
+                </div>
+              </div>
+              <div id="journalDetail" class="detail-content"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="trendsView" data-title="Analyze trends and generate reports">
+          <div class="split-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">TrendData</p>
+                  <h2>Field comparison</h2>
+                </div>
+                <button class="secondary-action" type="button" id="reportButton">Generate Custom Report</button>
+              </div>
+              <div class="trend-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Field</th>
+                      <th>Publications</th>
+                      <th>Citations</th>
+                    </tr>
+                  </thead>
+                  <tbody id="trendTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="panel report-panel">
+              <p class="eyebrow">Generated report</p>
+              <h2 id="reportTitle">AI Research Growth Summary</h2>
+              <p id="reportBody">Choose Generate Custom Report to compose a field-level summary from TrendData.</p>
+              <div class="report-stat">
+                <span>Top field</span>
+                <strong id="reportTopField">Artificial Intelligence</strong>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="savedView" data-title="Manage saved searches">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Researcher.savedSearches</p>
+                <h2>Saved searches</h2>
+              </div>
+              <button class="secondary-action" type="button" id="clearSavedButton">Clear Completed</button>
+            </div>
+            <div class="saved-grid" id="savedSearchList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="editorView" data-title="Editor journal management">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Editor.assignedJournals</p>
+                <h2>Manage journals</h2>
+              </div>
+              <button class="primary-action" type="button" id="assignJournalButton">Assign Journal</button>
+            </div>
+            <div class="editor-grid" id="editorJournalList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="adminView" data-title="Admin user management">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Admin</p>
+                <h2>Manage users</h2>
+              </div>
+              <button class="primary-action" type="button" id="addUserButton">Add User</button>
+            </div>
+            <div class="user-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="systemView" data-title="System configuration and import">
+          <div class="settings-grid">
+            <section class="panel">
+              <p class="eyebrow">Configure System</p>
+              <h2>Data sources</h2>
+              <label class="check-row"><input type="checkbox" checked /> Crossref import</label>
+              <label class="check-row"><input type="checkbox" checked /> Web of Science import</label>
+              <label class="check-row"><input type="checkbox" /> Scopus staging review</label>
+            </section>
+            <section class="panel">
+              <p class="eyebrow">Import Data</p>
+              <h2>Latest import queue</h2>
+              <div class="import-row"><span>journal_batch_2026_05.csv</span><strong>Ready</strong></div>
+              <div class="import-row"><span>article_citations_q2.json</span><strong>Queued</strong></div>
+              <button class="primary-action full" type="button">Start Import</button>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

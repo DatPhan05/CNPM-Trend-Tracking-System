@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getPaperById, getPapers } from "../controllers/paper.controller";
+import { getPaperById, getPapers, getTrends, searchPapers } from "../controllers/paper.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -17,15 +17,35 @@ const router = Router();
  *   get:
  *     summary: Get all scientific papers
  *     tags: [Papers]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Get papers successfully
- *       401:
- *         description: Access token is required
  */
-router.get("/", authenticateToken, getPapers);
+router.get("/", getPapers);
+
+/**
+ * @swagger
+ * /api/papers/search:
+ *   get:
+ *     summary: Search scientific papers
+ *     tags: [Papers]
+ *     responses:
+ *       200:
+ *         description: Search papers successfully
+ */
+router.get("/search", searchPapers);
+
+/**
+ * @swagger
+ * /api/papers/trends:
+ *   get:
+ *     summary: Get search trends
+ *     tags: [Papers]
+ *     responses:
+ *       200:
+ *         description: Get trends successfully
+ */
+router.get("/trends", getTrends);
 
 /**
  * @swagger
@@ -33,8 +53,6 @@ router.get("/", authenticateToken, getPapers);
  *   get:
  *     summary: Get scientific paper by id
  *     tags: [Papers]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -48,6 +66,6 @@ router.get("/", authenticateToken, getPapers);
  *       404:
  *         description: Paper not found
  */
-router.get("/:id", authenticateToken, getPaperById);
+router.get("/:id", getPaperById);
 
 export default router;

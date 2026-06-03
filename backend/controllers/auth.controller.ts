@@ -7,10 +7,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const fullName = req.body.fullName || req.body.name;
+    const { email, password, role } = req.body;
 
     if (!fullName || !email || !password) {
       return res.status(400).json({
+        success: false,
         message: "fullName, email and password are required",
       });
     }
@@ -21,6 +23,7 @@ export const register = async (req: Request, res: Response) => {
 
     if (existingUser) {
       return res.status(409).json({
+        success: false,
         message: "Email already exists",
       });
     }
@@ -44,11 +47,14 @@ export const register = async (req: Request, res: Response) => {
     });
 
     return res.status(201).json({
+      success: true,
       message: "Register successfully",
       user,
+      data: { user }
     });
   } catch (error) {
     return res.status(500).json({
+      success: false,
       message: "Internal server error",
       error,
     });
@@ -61,6 +67,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (!email || !password) {
       return res.status(400).json({
+        success: false,
         message: "email and password are required",
       });
     }
@@ -71,6 +78,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (!user || !user.password) {
       return res.status(401).json({
+        success: false,
         message: "Invalid email or password",
       });
     }
@@ -79,6 +87,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({
+        success: false,
         message: "Invalid email or password",
       });
     }
@@ -96,17 +105,32 @@ export const login = async (req: Request, res: Response) => {
     );
 
     return res.status(200).json({
+      success: true,
       message: "Login successfully",
       token,
+      access_token: token,
+      refresh_token: token,
       user: {
         id: user.id,
+        name: user.fullName,
         fullName: user.fullName,
         email: user.email,
-        role: user.role,
+        role: user.role.toLowerCase(),
       },
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.fullName,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        }
+      }
     });
   } catch (error) {
     return res.status(500).json({
+      success: false,
       message: "Internal server error",
       error,
     });

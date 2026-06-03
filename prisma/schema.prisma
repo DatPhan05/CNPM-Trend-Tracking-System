@@ -82,10 +82,10 @@ model Bookmark {
   id String @id @default(uuid())
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   paperId String
-  paper   Paper  @relation(fields: [paperId], references: [id])
+  paper   Paper  @relation(fields: [paperId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -98,7 +98,7 @@ model Report {
   content String?
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,8 +108,8 @@ model PaperAuthor {
   paperId  String
   authorId String
 
-  paper  Paper  @relation(fields: [paperId], references: [id])
-  author Author @relation(fields: [authorId], references: [id])
+  paper  Paper  @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@id([paperId, authorId])
 }
@@ -118,11 +118,12 @@ model PaperKeyword {
   paperId   String
   keywordId String
 
-  paper   Paper   @relation(fields: [paperId], references: [id])
-  keyword Keyword @relation(fields: [keywordId], references: [id])
+  paper   Paper   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  keyword Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
 
   @@id([paperId, keywordId])
 }
+
 model SystemSetting {
   id          String   @id @default(uuid())
   key         String   @unique

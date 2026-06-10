@@ -50,7 +50,7 @@
 ### 3.3 Bookmarks
 | # | Task | Trạng thái | File |
 |---|---|:---:|---|
-| 3.3.1 | API lấy danh sách bookmark (`GET /api/bookmarks`) | ✅ Hoàn thành | `bookmark.controller.ts` |
+| 3.3.1 | API lấy danh sách bookmark (`GET /api/bookmarks`) | ✅ Đã tối ưu | `bookmark.controller.ts` |
 | 3.3.2 | API thêm bookmark (`POST /api/bookmarks`) | ✅ Hoàn thành | `bookmark.controller.ts` |
 | 3.3.3 | ~~`POST /api/bookmarks/remove`~~ → Sửa thành `DELETE /api/bookmarks/:paperId` | ✅ Đã sửa | `bookmark.routes.ts` |
 | 3.3.4 | Controller đọc `paperId` từ `req.params` thay vì `req.body` | ✅ Đã sửa | `bookmark.controller.ts` |

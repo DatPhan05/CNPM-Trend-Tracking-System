@@ -25,8 +25,18 @@ export const getBookmarks = async (req: any, res: Response): Promise<void> => {
       },
     });
 
-    const papers = bookmarks.map((b) => b.paper);
-    res.json({ success: true, papers });
+    const mappedPapers = bookmarks.map((b) => ({
+      id: b.paper.id,
+      title: b.paper.title,
+      authors: b.paper.authors.map((pa: any) => pa.author.name),
+      year: b.paper.publicationYear || 2026,
+      journal: b.paper.journal?.name || "Local Database",
+      citations: b.paper.citationCount,
+      tags: b.paper.keywords.map((pk: any) => pk.keyword.name),
+      abstract: b.paper.abstract || "",
+    }));
+    
+    res.json({ success: true, papers: mappedPapers });
   } catch (error: any) {
     console.error("❌ getBookmarks error:", error);
     res.status(500).json({ success: false, message: error.message });

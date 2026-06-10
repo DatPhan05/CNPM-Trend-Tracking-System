@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="border-t border-border bg-background pt-16 pb-8">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-16">
-          
+
           {/* Brand Info */}
           <div className="md:col-span-1 lg:col-span-1 flex flex-col gap-4">
             <Link to="/" className="flex items-center gap-2">
@@ -60,12 +60,12 @@ export default function Footer() {
             <h3 className="font-semibold text-foreground">Đăng ký nhận tin</h3>
             <p className="text-sm text-muted-foreground">Nhận thông báo về các xu hướng nghiên cứu mới nhất.</p>
             <form className="flex mt-2" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="Email của bạn" 
+              <input
+                type="email"
+                placeholder="Email của bạn"
                 className="flex h-10 w-full rounded-l-md border border-r-0 border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
-              <button 
+              <button
                 type="submit"
                 className="inline-flex h-10 items-center justify-center rounded-r-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >

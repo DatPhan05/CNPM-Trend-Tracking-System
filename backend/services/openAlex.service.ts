@@ -32,6 +32,9 @@ export const fetchOpenAlexWorks = async (keyword: string, perPage = 10) => {
       search: keyword,
       per_page: perPage,
     },
+    headers: {
+      "User-Agent": "TrendScholar/1.0.0 (mailto:admin@example.com)",
+    },
   });
 
   return response.data.results as OpenAlexWork[];

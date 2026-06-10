@@ -52,27 +52,27 @@ router.post("/", authenticateToken, addBookmark);
 
 /**
  * @swagger
- * /api/bookmarks/remove:
- *   post:
+ * /api/bookmarks/{paperId}:
+ *   delete:
  *     summary: Remove bookmark from a scientific paper
  *     tags: [Bookmarks]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - paperId
- *             properties:
- *               paperId:
- *                 type: string
+ *     parameters:
+ *       - in: path
+ *         name: paperId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the paper to un-bookmark
  *     responses:
  *       200:
  *         description: Bookmark removed successfully
+ *       401:
+ *         description: Access token is required
+ *       404:
+ *         description: Bookmark not found
  */
-router.post("/remove", authenticateToken, removeBookmark);
+router.delete("/:paperId", authenticateToken, removeBookmark);
 
 export default router;

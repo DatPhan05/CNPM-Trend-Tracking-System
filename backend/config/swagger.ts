@@ -4,14 +4,14 @@ export const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "TrendScholar API",
+      title: "Trend-Tracking-System API",
       version: "1.0.0",
       description:
-        "API documentation for Scientific Journal Publication Trend Tracking System",
+        "API documentation for Trend-Tracking-System",
     },
     servers: [
       {
-        url: "http://localhost:8080",
+        url: "http://localhost:8000",
         description: "Local development server",
       },
     ],
@@ -25,5 +25,5 @@ export const swaggerSpec = swaggerJsdoc({
       },
     },
   },
-  apis: ["src/routes/*.ts"],
+  apis: ["./backend/routes/*.ts", "./dist/backend/routes/*.js"],
 });

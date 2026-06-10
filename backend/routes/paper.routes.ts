@@ -49,9 +49,21 @@ const router = Router();
  *           enum: [local, openalex]
  *           default: local
  *         description: Data source mode
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of papers matching the query
+ *         description: List of papers matching the query with pagination metadata
  */
 router.get("/", (req, res) => {
   // RESTful: single GET /papers endpoint handles both listing and searching

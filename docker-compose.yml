@@ -1,6 +1,23 @@
+# --------------------------------------------------------------------------
+# Docker Compose for Scientific Journal Publication Trend Tracking System
+#
+# 3-tier architecture:
+#   Tier 1 - NGINX:    Reverse proxy + serves React static files (port 80)
+#   Tier 2 - Backend:  Express.js API server (port 8080, internal)
+#            Frontend: React build → static files (shared volume)
+#   Tier 3 - Postgres: PostgreSQL database (port 5432, internal)
+#
+# Usage:
+#   docker compose up --build        # Build and start all services
+#   docker compose up -d             # Start in detached mode
+#   docker compose down              # Stop all services
+#   docker compose down -v           # Stop and remove volumes
+# --------------------------------------------------------------------------
+
 version: "3.8"
 
 services:
+  # ---- Tier 3: Database ----
   postgres:
     image: postgres:18
     container_name: scientific_trend_postgres
@@ -11,8 +28,78 @@ services:
       POSTGRES_DB: scientific_trend_db
     ports:
       - "5434:5432"
+    networks:
+      - app-net
     volumes:
       - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d scientific_trend_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- pgAdmin 4: Database Management UI ----
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: scientific_trend_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    networks:
+      - app-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---- Tier 2: Backend (Express.js + Prisma) ----
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: scientific_trend_backend
+    restart: always
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/scientific_trend_db
+      JWT_SECRET: dockerized_jwt_secret
+    networks:
+      - app-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "npx prisma migrate deploy && node dist/backend/server.js"
+
+  # ---- Tier 2: Frontend (React build → static files) ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: scientific_trend_frontend
+    volumes:
+      - frontend_build:/app/dist
+
+  # ---- Tier 1: Reverse Proxy (NGINX) ----
+  nginx:
+    build: ./nginx
+    container_name: scientific_trend_nginx
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - app-net
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+    depends_on:
+      - backend
+      - frontend
 
 volumes:
   postgres_data:
+  frontend_build:
+
+networks:
+  app-net:

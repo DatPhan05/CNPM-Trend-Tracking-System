@@ -1,9 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, TrendingUp, BookOpen, UserCircle, Menu, X, Zap } from 'lucide-react';
+import { Search, TrendingUp, BookOpen, UserCircle, Menu, X, Zap, Bookmark } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/utils/cn';
 
-export default function Navbar() {
+export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSidebar?: () => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
@@ -33,6 +33,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Khám phá', path: '/search', icon: Search },
     { name: 'Xu hướng', path: '/trends', icon: TrendingUp },
+    ...(userName ? [{ name: 'Thư viện', path: '/dashboard', icon: Bookmark }] : []),
   ];
 
   const handleLogout = () => {
@@ -97,9 +98,12 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {userName ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-foreground hidden lg:block">
-                  Chào, <span className="text-primary">{userName}</span>
-                </span>
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-medium text-foreground hover:text-primary transition-colors hidden lg:block"
+                >
+                  Chào, <span className="text-primary font-semibold">{userName}</span>
+                </Link>
                 {userRole === 'admin' && (
                   <Link
                     to="/admin"
@@ -138,7 +142,13 @@ export default function Navbar() {
         {/* Mobile Menu Toggle */}
         <button
           className="md:hidden text-foreground p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => {
+            if (userName && onToggleMobileSidebar) {
+              onToggleMobileSidebar();
+            } else {
+              setMobileMenuOpen(!mobileMenuOpen);
+            }
+          }}
         >
           {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>

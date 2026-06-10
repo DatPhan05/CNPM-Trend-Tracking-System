@@ -24,7 +24,8 @@ export default function AdminDashboardPage() {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await api.get('/auth/users');
+      // RESTful: users is a top-level resource, not a sub-resource of auth
+      const { data } = await api.get('/users');
       setUsers(data.users);
       setStats({
         total: data.count,
@@ -48,7 +49,7 @@ export default function AdminDashboardPage() {
     }
 
     try {
-      await api.delete(`/auth/users/${id}`);
+      await api.delete(`/users/${id}`);
       toast.success('Đã xóa tài khoản thành công');
       fetchUsers(); // Refresh list
     } catch (error) {
@@ -111,8 +112,8 @@ export default function AdminDashboardPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-foreground">{user.name}</td>
+                  <tr key={user.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-foreground">{user.fullName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{user.email}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -125,7 +126,7 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button
-                        onClick={() => handleDeleteUser(user._id, user.name, user.role)}
+                        onClick={() => handleDeleteUser(user.id, user.fullName, user.role)}
                         disabled={user.role === 'admin'}
                         className={`p-2 rounded-lg transition-colors ${
                           user.role === 'admin'

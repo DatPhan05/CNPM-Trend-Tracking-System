@@ -61,7 +61,8 @@ export const addBookmark = async (req: any, res: Response): Promise<void> => {
 export const removeBookmark = async (req: any, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id || req.user?.userId;
-    const { paperId } = req.body;
+    // RESTful: paperId comes from URL path param (:paperId), not request body
+    const { paperId } = req.params;
 
     if (!userId || !paperId) {
       res.status(400).json({ success: false, message: "Missing user or paper identification." });

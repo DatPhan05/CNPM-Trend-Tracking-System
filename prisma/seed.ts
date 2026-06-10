@@ -1,5 +1,6 @@
 import { UserRole } from "@prisma/client";
 import prisma from "../backend/lib/prisma";
+import bcrypt from "bcrypt";
 
 async function main() {
   console.log("🌱 Bắt đầu tạo dữ liệu mẫu (Seeding)...");
@@ -17,11 +18,14 @@ async function main() {
 
   console.log("🧹 Đã làm sạch cơ sở dữ liệu.");
 
+  const defaultPassword = await bcrypt.hash("admin123", 10);
+
   // 2. Tạo Người dùng (Users)
   const admin = await prisma.user.create({
     data: {
       fullName: "admintest",
-      email: "admin@gmail.com",
+      email: "admin@admin.com",
+      password: defaultPassword,
       role: UserRole.ADMIN,
     },
   });
@@ -30,6 +34,7 @@ async function main() {
     data: {
       fullName: "researchertest",
       email: "researcher@gmail.com",
+      password: defaultPassword,
       role: UserRole.RESEARCHER,
     },
   });
@@ -38,6 +43,7 @@ async function main() {
     data: {
       fullName: "studenttest",
       email: "student@gmail.com",
+      password: defaultPassword,
       role: UserRole.STUDENT,
     },
   });

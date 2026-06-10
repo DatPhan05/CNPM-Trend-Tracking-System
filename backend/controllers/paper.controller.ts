@@ -21,22 +21,27 @@ function reconstructAbstract(invertedIndex: any): string {
 
 export const getPapers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const query = (req.query.query as string) || "";
+    const keyword = (req.query.keyword as string) || (req.query.query as string) || "";
     const yearParam = req.query.year as string;
     const authorParam = req.query.author as string;
+    
+    // Pagination parameters
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+    const skip = (page - 1) * limit;
 
     const whereClause: any = {};
 
     // 1. Text Search across Title and Abstract
-    if (query) {
+    if (keyword) {
       whereClause.OR = [
-        { title: { contains: query, mode: "insensitive" } },
-        { abstract: { contains: query, mode: "insensitive" } },
+        { title: { contains: keyword, mode: "insensitive" } },
+        { abstract: { contains: keyword, mode: "insensitive" } },
         {
           keywords: {
             some: {
               keyword: {
-                name: { contains: query, mode: "insensitive" },
+                name: { contains: keyword, mode: "insensitive" },
               },
             },
           },
@@ -63,28 +68,56 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
       };
     }
 
-    // 4. Fetch from database
-    const papers = await prisma.paper.findMany({
-      where: whereClause,
-      include: {
-        journal: true,
-        authors: {
-          include: {
-            author: true,
+    // 4. Fetch from database with pagination
+    const [total, papers] = await prisma.$transaction([
+      prisma.paper.count({ where: whereClause }),
+      prisma.paper.findMany({
+        where: whereClause,
+        include: {
+          journal: true,
+          authors: {
+            include: {
+              author: true,
+            },
+          },
+          keywords: {
+            include: {
+              keyword: true,
+            },
           },
         },
-        keywords: {
-          include: {
-            keyword: true,
-          },
+        orderBy: {
+          citationCount: "desc",
         },
-      },
-      orderBy: {
-        citationCount: "desc",
-      },
-    });
+        skip,
+        take: limit,
+      })
+    ]);
 
-    res.json({ success: true, message: "Get papers successfully", papers });
+    const mappedPapers = papers.map((p) => ({
+      id: p.id,
+      title: p.title,
+      authors: p.authors.map((pa) => pa.author.name),
+      year: p.publicationYear || 2026,
+      journal: p.journal?.name || "Local Database",
+      citations: p.citationCount,
+      tags: p.keywords.map((pk) => pk.keyword.name),
+      abstract: p.abstract || "",
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({ 
+      success: true, 
+      message: "Get papers successfully", 
+      data: mappedPapers,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages
+      }
+    });
   } catch (error: any) {
     console.error("❌ getPapers error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -183,83 +216,42 @@ export const getTrends = async (req: Request, res: Response): Promise<void> => {
 
 export const searchPapers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const keyword = (req.query.keyword as string) || "";
-    const mode = (req.query.mode as string) || "mock";
+    const keyword = (req.query.keyword as string) || (req.query.query as string) || "";
+    // Note: OpenAlex API pagination
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
 
-    if (mode === "openalex") {
-      console.log(`🔍 Searching OpenAlex for keyword: "${keyword}"`);
-      const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(keyword)}&per-page=10`;
-      const response = await axios.get(openAlexUrl, {
-        headers: { "User-Agent": "ScientificJournalTrendTracker/1.0 (mailto:admin@trendtracking.com)" }
-      });
-
-      const works = response.data.results || [];
-      const mappedPapers = works.map((work: any) => ({
-        id: work.id,
-        title: work.title || "Untitled",
-        authors: work.authorships?.map((a: any) => a.author?.display_name).filter(Boolean) || [],
-        year: work.publication_year || 2026,
-        journal: work.primary_location?.source?.display_name || "Open Access",
-        citations: work.cited_by_count || 0,
-        tags: work.concepts?.slice(0, 3).map((c: any) => c.display_name) || ["Research"],
-        abstract: reconstructAbstract(work.abstract_inverted_index) || work.description || ""
-      }));
-
-      res.json({ success: true, data: mappedPapers });
-      return;
-    }
-
-    console.log(`🔍 Searching local database for keyword: "${keyword}"`);
-    const whereClause: any = {};
-    if (keyword) {
-      whereClause.OR = [
-        { title: { contains: keyword, mode: "insensitive" } },
-        { abstract: { contains: keyword, mode: "insensitive" } },
-        {
-          keywords: {
-            some: {
-              keyword: {
-                name: { contains: keyword, mode: "insensitive" },
-              },
-            },
-          },
-        },
-      ];
-    }
-
-    const papers = await prisma.paper.findMany({
-      where: whereClause,
-      include: {
-        journal: true,
-        authors: {
-          include: {
-            author: true,
-          },
-        },
-        keywords: {
-          include: {
-            keyword: true,
-          },
-        },
-      },
-      orderBy: {
-        citationCount: "desc",
-      },
-      take: 15,
+    console.log(`🔍 Searching OpenAlex for keyword: "${keyword}"`);
+    const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(keyword)}&page=${page}&per-page=${limit}`;
+    const response = await axios.get(openAlexUrl, {
+      headers: { "User-Agent": "ScientificJournalTrendTracker/1.0 (mailto:admin@trendtracking.com)" }
     });
 
-    const mappedPapers = papers.map((p) => ({
-      id: p.id,
-      title: p.title,
-      authors: p.authors.map((pa) => pa.author.name),
-      year: p.publicationYear || 2026,
-      journal: p.journal?.name || "Local Database",
-      citations: p.citationCount,
-      tags: p.keywords.map((pk) => pk.keyword.name),
-      abstract: p.abstract || "",
+    const works = response.data.results || [];
+    const total = response.data.meta?.count || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    const mappedPapers = works.map((work: any) => ({
+      id: work.id,
+      title: work.title || "Untitled",
+      authors: work.authorships?.map((a: any) => a.author?.display_name).filter(Boolean) || [],
+      year: work.publication_year || 2026,
+      journal: work.primary_location?.source?.display_name || "Open Access",
+      citations: work.cited_by_count || 0,
+      tags: work.concepts?.slice(0, 3).map((c: any) => c.display_name) || ["Research"],
+      abstract: reconstructAbstract(work.abstract_inverted_index) || work.description || ""
     }));
 
-    res.json({ success: true, data: mappedPapers });
+    res.json({ 
+      success: true, 
+      data: mappedPapers,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages
+      } 
+    });
   } catch (error: any) {
     console.error("❌ searchPapers error:", error);
     res.status(500).json({ success: false, message: error.message });

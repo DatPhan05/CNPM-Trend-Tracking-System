@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { getPaperById, getPapers, getTrends, searchPapers } from "../controllers/paper.controller";
-import { authenticateToken } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -15,35 +14,66 @@ const router = Router();
  * @swagger
  * /api/papers:
  *   get:
- *     summary: Get all scientific papers
+ *     summary: Get / search scientific papers
+ *     description: |
+ *       RESTful unified endpoint for listing and searching papers.
+ *       Supports two modes via the `mode` query parameter:
+ *       - `local` (default): searches the internal PostgreSQL database
+ *       - `openalex`: searches the OpenAlex external API in real-time
  *     tags: [Papers]
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         description: Keyword to search in title, abstract, or keywords (local mode)
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *         description: Filter by publication year (local mode)
+ *       - in: query
+ *         name: author
+ *         schema:
+ *           type: string
+ *         description: Filter by author name (local mode)
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         description: Keyword for OpenAlex search (openalex mode)
+ *       - in: query
+ *         name: mode
+ *         schema:
+ *           type: string
+ *           enum: [local, openalex]
+ *           default: local
+ *         description: Data source mode
  *     responses:
  *       200:
- *         description: Get papers successfully
+ *         description: List of papers matching the query
  */
-router.get("/", getPapers);
-
-/**
- * @swagger
- * /api/papers/search:
- *   get:
- *     summary: Search scientific papers
- *     tags: [Papers]
- *     responses:
- *       200:
- *         description: Search papers successfully
- */
-router.get("/search", searchPapers);
+router.get("/", (req, res) => {
+  // RESTful: single GET /papers endpoint handles both listing and searching
+  // via query parameters instead of a separate /papers/search sub-resource
+  const mode = req.query.mode as string;
+  if (mode === "openalex") {
+    // Delegate to searchPapers which handles the OpenAlex API call
+    return searchPapers(req, res);
+  }
+  // Default: search/list from local database
+  return getPapers(req, res);
+});
 
 /**
  * @swagger
  * /api/papers/trends:
  *   get:
- *     summary: Get search trends
+ *     summary: Get research trends and top keywords
  *     tags: [Papers]
  *     responses:
  *       200:
- *         description: Get trends successfully
+ *         description: Aggregated trend statistics
  */
 router.get("/trends", getTrends);
 
@@ -51,7 +81,7 @@ router.get("/trends", getTrends);
  * @swagger
  * /api/papers/{id}:
  *   get:
- *     summary: Get scientific paper by id
+ *     summary: Get a scientific paper by ID
  *     tags: [Papers]
  *     parameters:
  *       - in: path
@@ -59,10 +89,10 @@ router.get("/trends", getTrends);
  *         required: true
  *         schema:
  *           type: string
- *         description: Paper id
+ *         description: UUID of the paper
  *     responses:
  *       200:
- *         description: Get paper successfully
+ *         description: Paper found
  *       404:
  *         description: Paper not found
  */

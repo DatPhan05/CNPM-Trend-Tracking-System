@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getMe, login, register } from "../controllers/auth.controller";
+import { getMe, login, register, refreshToken } from "../controllers/auth.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -100,5 +100,32 @@ router.post("/login", login);
  *         description: Invalid or expired token
  */
 router.get("/me", authenticateToken, getMe);
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refresh_token
+ *             properties:
+ *               refresh_token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: New access_token and refresh_token returned
+ *       400:
+ *         description: refresh_token is required
+ *       401:
+ *         description: Invalid or tampered token
+ */
+router.post("/refresh", refreshToken);
 
 export default router;

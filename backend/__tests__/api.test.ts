@@ -2,6 +2,8 @@ import request from "supertest";
 import app from "../app";
 import prisma from "../lib/prisma";
 
+jest.mock("../lib/prisma");
+
 describe("🧪 API Integration & Endpoint Unit Tests", () => {
   let token: string;
   let testPaperId: string;
@@ -137,13 +139,44 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
     });
 
     it("should successfully remove paper from bookmarks list", async () => {
+      // RESTful: DELETE /api/bookmarks/:paperId (was POST /api/bookmarks/remove)
       const res = await request(app)
-        .post("/api/bookmarks/remove")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ paperId: testPaperId });
+        .delete(`/api/bookmarks/${testPaperId}`)
+        .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
+    });
+  });
+
+  describe("🔄 Refresh Token Endpoint", () => {
+    it("should return a new access_token given a valid refresh_token", async () => {
+      const res = await request(app)
+        .post("/api/auth/refresh")
+        .send({ refresh_token: token });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.access_token).toBeDefined();
+      expect(res.body.refresh_token).toBeDefined();
+    });
+
+    it("should return 400 when refresh_token is missing", async () => {
+      const res = await request(app)
+        .post("/api/auth/refresh")
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should return 401 when refresh_token is invalid/tampered", async () => {
+      const res = await request(app)
+        .post("/api/auth/refresh")
+        .send({ refresh_token: "this.is.not.a.valid.jwt" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
     });
   });
 });

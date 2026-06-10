@@ -162,3 +162,66 @@ export const getMe = async (req: Request, res: Response) => {
     });
   }
 };
+
+// ── Refresh Token ─────────────────────────────────────────────────────────────
+// The frontend calls POST /api/auth/refresh when the 401 interceptor fires.
+// Strategy: verify the existing token (ignoring expiry via ignoreExpiration),
+// look up the user in DB to ensure account still exists/is active,
+// then issue a brand-new 24h access token.
+export const refreshToken = async (req: Request, res: Response) => {
+  try {
+    const { refresh_token } = req.body;
+
+    if (!refresh_token) {
+      return res.status(400).json({
+        success: false,
+        message: "refresh_token is required",
+      });
+    }
+
+    // Verify signature but allow expired tokens so users can still refresh
+    let decoded: any;
+    try {
+      decoded = jwt.verify(refresh_token, JWT_SECRET, {
+        ignoreExpiration: true,
+      });
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid refresh token",
+      });
+    }
+
+    // Ensure the user still exists in the database
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, email: true, role: true, fullName: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found — please log in again",
+      });
+    }
+
+    // Issue a fresh access token (24h) and reuse same token as refresh token
+    const newAccessToken = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      access_token: newAccessToken,
+      refresh_token: newAccessToken, // stateless: same token acts as refresh
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error,
+    });
+  }
+};

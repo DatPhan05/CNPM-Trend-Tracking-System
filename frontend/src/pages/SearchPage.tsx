@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, BookOpen, Star, ExternalLink, Calendar, Users, Database } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, BookOpen, Star, ExternalLink, Calendar, Users, Database, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import api from '@/services/api';
+import toast from 'react-hot-toast';
 
 interface Paper {
   id: string | number;
@@ -20,34 +21,85 @@ export default function SearchPage() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [mode, setMode] = useState<'mock' | 'openalex'>('mock');
   const [hasSearched, setHasSearched] = useState(false);
+  // Track which paper IDs are bookmarked by current user
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
+
+  const isLoggedIn = !!localStorage.getItem('access_token');
 
   const fetchPapers = async (searchQuery: string) => {
     setIsSearching(true);
     try {
-      const response = await api.get('/papers/search', {
+      // RESTful: unified GET /papers endpoint with query params
+      // mode=openalex → OpenAlex API, mode=local (default) → internal DB
+      const response = await api.get('/papers', {
         params: { keyword: searchQuery || 'machine learning', mode }
       });
-      setPapers(response.data.data || []);
+      setPapers(response.data.data || response.data.papers || []);
       setHasSearched(true);
     } catch (error) {
       console.error('Failed to fetch papers', error);
-      // Fallback to empty array
       setPapers([]);
     } finally {
       setIsSearching(false);
     }
   };
 
-  // Fetch initial data (optional) or let user search first
+  // Load current user's bookmarks to sync bookmark button state
+  const fetchBookmarks = async () => {
+    if (!isLoggedIn) return;
+    try {
+      const { data } = await api.get('/bookmarks');
+      const ids = new Set<string>((data.papers || []).map((p: Paper) => String(p.id)));
+      setBookmarkedIds(ids);
+    } catch {
+      // Not critical — ignore silently
+    }
+  };
+
+  // Fetch initial data or let user search first
   useEffect(() => {
     if (mode === 'mock') {
       fetchPapers('');
     }
+    fetchBookmarks();
   }, [mode]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchPapers(query);
+  };
+
+  const handleToggleBookmark = async (paper: Paper) => {
+    if (!isLoggedIn) {
+      toast.error('Vui lòng đăng nhập để lưu bookmark');
+      return;
+    }
+
+    const paperId = String(paper.id);
+    setBookmarkLoading(paperId);
+
+    try {
+      if (bookmarkedIds.has(paperId)) {
+        // RESTful DELETE /api/bookmarks/:paperId
+        await api.delete(`/bookmarks/${paperId}`);
+        setBookmarkedIds(prev => {
+          const next = new Set(prev);
+          next.delete(paperId);
+          return next;
+        });
+        toast.success('Đã xóa bookmark');
+      } else {
+        // POST /api/bookmarks with paperId in body
+        await api.post('/bookmarks', { paperId });
+        setBookmarkedIds(prev => new Set(prev).add(paperId));
+        toast.success('Đã lưu bookmark ⭐');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Không thể cập nhật bookmark');
+    } finally {
+      setBookmarkLoading(null);
+    }
   };
 
   return (
@@ -179,70 +231,91 @@ export default function SearchPage() {
                <p className="text-lg">Không tìm thấy bài báo nào phù hợp.</p>
              </div>
           ) : (
-            papers.map((paper, idx) => (
-              <div 
-                key={paper.id} 
-                className="group bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all hover:border-primary/40 animate-slide-up"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <div className="flex justify-between items-start gap-4">
-                  <h3 className="text-xl font-bold text-primary group-hover:underline cursor-pointer line-clamp-2" title={paper.title}>
-                    {paper.title}
-                  </h3>
-                  <button className="text-muted-foreground hover:text-amber-500 transition-colors flex-shrink-0">
-                    <Star className="h-5 w-5" />
-                  </button>
-                </div>
-                
-                <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground flex-wrap">
-                  <Users className="h-4 w-4 flex-shrink-0" />
-                  <span className="line-clamp-1">{paper.authors && paper.authors.length > 0 ? paper.authors.join(', ') : 'Unknown Authors'}</span>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm font-medium">
-                  <div className="flex items-center gap-1.5 text-foreground">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    {paper.year}
+            papers.map((paper, idx) => {
+              const paperId = String(paper.id);
+              const isBookmarked = bookmarkedIds.has(paperId);
+              const isLoadingThis = bookmarkLoading === paperId;
+              return (
+                <div 
+                  key={paper.id} 
+                  className="group bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all hover:border-primary/40 animate-slide-up"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
+                >
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className="text-xl font-bold text-primary group-hover:underline cursor-pointer line-clamp-2" title={paper.title}>
+                      {paper.title}
+                    </h3>
+                    {/* ── Bookmark Button ── */}
+                    <button
+                      id={`bookmark-btn-${paperId}`}
+                      onClick={() => handleToggleBookmark(paper)}
+                      disabled={isLoadingThis}
+                      title={isBookmarked ? 'Xóa bookmark' : 'Lưu bài báo này'}
+                      className={cn(
+                        "flex-shrink-0 transition-all duration-200 rounded-lg p-1.5",
+                        isBookmarked
+                          ? "text-amber-500 hover:text-amber-600"
+                          : "text-muted-foreground hover:text-amber-500",
+                        isLoadingThis && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {isBookmarked
+                        ? <BookmarkCheck className="h-5 w-5 fill-current" />
+                        : <BookmarkPlus className="h-5 w-5" />
+                      }
+                    </button>
                   </div>
-                  {paper.journal && (
+                  
+                  <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground flex-wrap">
+                    <Users className="h-4 w-4 flex-shrink-0" />
+                    <span className="line-clamp-1">{paper.authors && paper.authors.length > 0 ? paper.authors.join(', ') : 'Unknown Authors'}</span>
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-4 mt-3 text-sm font-medium">
                     <div className="flex items-center gap-1.5 text-foreground">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                      {paper.journal}
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      {paper.year}
                     </div>
+                    {paper.journal && (
+                      <div className="flex items-center gap-1.5 text-foreground">
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        {paper.journal}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <Star className="h-4 w-4" />
+                      {(paper.citations || 0).toLocaleString()} trích dẫn
+                    </div>
+                  </div>
+
+                  {paper.abstract && (
+                     <p className="mt-4 text-sm text-muted-foreground line-clamp-3">
+                       {paper.abstract}
+                     </p>
                   )}
-                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                    <Star className="h-4 w-4" />
-                    {(paper.citations || 0).toLocaleString()} trích dẫn
+
+                  {mode === 'openalex' && (
+                    <p className="mt-2 text-xs text-muted-foreground/80 flex items-center gap-1">
+                      <BookOpen className="h-3 w-3" />
+                      Được cung cấp bởi OpenAlex API
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(paper.tags || ['Research']).map((tag, i) => (
+                        <span key={i} className="px-2.5 py-1 bg-secondary text-secondary-foreground text-xs rounded-md font-medium">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                      Xem chi tiết <ExternalLink className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-
-                {paper.abstract && (
-                   <p className="mt-4 text-sm text-muted-foreground line-clamp-3">
-                     {paper.abstract}
-                   </p>
-                )}
-
-                {mode === 'openalex' && (
-                  <p className="mt-2 text-xs text-muted-foreground/80 flex items-center gap-1">
-                    <BookOpen className="h-3 w-3" />
-                    Được cung cấp bởi OpenAlex API
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {(paper.tags || ['Research']).map((tag, i) => (
-                      <span key={i} className="px-2.5 py-1 bg-secondary text-secondary-foreground text-xs rounded-md font-medium">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <button className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-                    Xem chi tiết <ExternalLink className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
 
           {/* Pagination Mock */}

@@ -21,25 +21,30 @@ export default function SearchPage() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [mode, setMode] = useState<'mock' | 'openalex'>('mock');
   const [hasSearched, setHasSearched] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   // Track which paper IDs are bookmarked by current user
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
 
   const isLoggedIn = !!localStorage.getItem('access_token');
 
-  const fetchPapers = async (searchQuery: string) => {
+  const fetchPapers = async (searchQuery: string, page: number = 1) => {
     setIsSearching(true);
     try {
       // RESTful: unified GET /papers endpoint with query params
       // mode=openalex → OpenAlex API, mode=local (default) → internal DB
       const response = await api.get('/papers', {
-        params: { keyword: searchQuery || 'machine learning', mode }
+        params: { keyword: searchQuery || 'machine learning', mode, page, limit: 10 }
       });
       setPapers(response.data.data || response.data.papers || []);
+      setTotalPages(response.data.meta?.totalPages || 1);
+      setCurrentPage(page);
       setHasSearched(true);
     } catch (error) {
       console.error('Failed to fetch papers', error);
       setPapers([]);
+      setTotalPages(1);
     } finally {
       setIsSearching(false);
     }
@@ -60,14 +65,16 @@ export default function SearchPage() {
   // Fetch initial data or let user search first
   useEffect(() => {
     if (mode === 'mock') {
-      fetchPapers('');
+      setCurrentPage(1);
+      fetchPapers('', 1);
     }
     fetchBookmarks();
   }, [mode]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchPapers(query);
+    setCurrentPage(1);
+    fetchPapers(query, 1);
   };
 
   const handleToggleBookmark = async (paper: Paper) => {
@@ -318,14 +325,41 @@ export default function SearchPage() {
             })
           )}
 
-          {/* Pagination Mock */}
-          <div className="flex items-center justify-center gap-2 mt-8">
-            <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-muted text-sm font-medium text-foreground">1</button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-md">2</button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-muted text-sm font-medium text-foreground">3</button>
-            <span className="text-muted-foreground">...</span>
-            <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-muted text-sm font-medium text-foreground">10</button>
-          </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => fetchPapers(query, currentPage - 1)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-muted text-sm font-medium text-foreground disabled:opacity-50"
+              >
+                &lt;
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => fetchPapers(query, p)}
+                  className={cn(
+                    "w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors",
+                    currentPage === p
+                      ? "bg-primary text-primary-foreground font-bold shadow-md"
+                      : "border border-border hover:bg-muted text-foreground"
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => fetchPapers(query, currentPage + 1)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-muted text-sm font-medium text-foreground disabled:opacity-50"
+              >
+                &gt;
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

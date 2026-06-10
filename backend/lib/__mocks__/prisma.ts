@@ -172,6 +172,7 @@ const prismaMock = {
       return null;
     }),
   },
+  $transaction: jest.fn().mockImplementation(async (promises) => Promise.all(promises)),
   $disconnect: jest.fn().mockResolvedValue(undefined),
 };
 

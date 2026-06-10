@@ -74,7 +74,7 @@
 | 3.6.1 | Thêm `Cache-Control` headers middleware | ✅ Đã thêm | `app.ts` |
 | 3.6.2 | Tài liệu hóa API bằng Swagger/OpenAPI | ✅ Hoàn thành | `swagger.config.ts`, route files |
 | 3.6.3 | Swagger UI tại `/api-docs` | ✅ Hoàn thành | `app.ts` |
-| 3.6.4 | Thêm pagination cho `GET /api/papers` | ⬜ Chưa làm | `paper.controller.ts` |
+| 3.6.4 | Thêm pagination cho `GET /api/papers` | ✅ Hoàn thành | `paper.controller.ts` |
 | 3.6.5 | Thêm input validation middleware (express-validator) | ⬜ Chưa làm | — |
 
 ---
@@ -154,11 +154,11 @@
 |---|:---:|:---:|:---:|
 | Tài liệu | 5/5 | 0 | 0 |
 | Database | 3/5 | 0 | 2 |
-| Backend | 22/25 | 0 | 3 |
+| Backend | 23/25 | 0 | 2 |
 | Frontend | 12/12 | 0 | 0 |
 | DevOps/Hạ tầng | 15/16 | 0 | 1 |
 | Kiểm thử | 5/6 | 0 | 1 |
-| **Tổng** | **62/69** | **0** | **7** |
+| **Tổng** | **63/69** | **0** | **6** |
 
 > **Tiến độ tổng thể: ~90%** ✅
 

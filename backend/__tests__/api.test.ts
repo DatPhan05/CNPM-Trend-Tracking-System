@@ -93,13 +93,20 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
       const res = await request(app).get("/api/papers");
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(Array.isArray(res.body.papers)).toBe(true);
+      expect(Array.isArray(res.body.data)).toBe(true);
     });
 
     it("should filter papers by title search query", async () => {
       const res = await request(app).get("/api/papers?query=Test");
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
+    });
+
+    it("should fetch a paper by ID", async () => {
+      const res = await request(app).get(`/api/papers/${testPaperId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe("Get paper successfully");
+      expect(res.body.paper.id).toBe(testPaperId);
     });
 
     it("should successfully fetch trends statistics metrics", async () => {

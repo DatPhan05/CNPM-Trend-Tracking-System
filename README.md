@@ -1,4 +1,4 @@
-# 📚 Scientific Journal Publication Trend Tracking System (TrendScholar)
+# 📚 Scientific Journal Publication Trend Tracking System
 
 > Hệ thống thu thập, phân tích và theo dõi xu hướng xuất bản bài báo khoa học.
 > Kiến trúc 3-tier hiện đại: React (SPA) + Express (RESTful API) + PostgreSQL (Database).
@@ -11,6 +11,62 @@
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM, Swagger OpenAPI.
 - **Cơ sở dữ liệu**: PostgreSQL.
 - **DevOps/Hạ tầng**: Docker, Docker Compose, NGINX, Jenkins CI/CD Pipeline.
+
+---
+
+## 📁 Cấu trúc thư mục (Project Structure)
+
+Dưới đây là cấu trúc thư mục tổng quan của dự án, được tổ chức theo mô hình Monorepo chứa cả Backend, Frontend và cấu hình DevOps:
+
+```text
+├── .env
+├── .env.example
+├── .gitignore
+│
+├── backend/                   # 🚀 Backend Node.js/Express
+│   ├── __tests__/             # Các file Unit Test (Jest)
+│   ├── config/                # Cấu hình hệ thống (Swagger, v.v)
+│   ├── controllers/           # Xử lý logic Request/Response
+│   ├── lib/                   # Các thư viện dùng chung (Prisma client)
+│   ├── middlewares/           # Auth & Phân quyền
+│   ├── routes/                # Định tuyến API endpoints
+│   ├── services/              # Xử lý logic gọi API ngoài (OpenAlex)
+│   ├── app.ts                 # Khởi tạo Express app
+│   ├── server.ts              # Entry point của Backend
+│   ├── Dockerfile             
+│   └── swagger.config.ts      
+│
+├── frontend/                  # 🎨 Frontend React/Vite
+│   ├── src/                   
+│   │   ├── assets/            
+│   │   ├── components/        # Các UI Components dùng chung (Layout, Navbar)
+│   │   ├── pages/             # Các trang chính (Home, Search, Admin, v.v)
+│   │   ├── services/          # Gọi API tới Backend (Axios)
+│   │   ├── styles/            # CSS toàn cục (Tailwind)
+│   │   ├── types/             # Khai báo TypeScript types/interfaces
+│   │   ├── utils/             # Các hàm tiện ích
+│   │   ├── App.tsx            # Main router
+│   │   └── main.tsx           # Entry point của Frontend
+│   ├── package.json
+│   ├── tailwind.config.js     # Cấu hình Tailwind CSS
+│   └── vite.config.ts         # Cấu hình Vite bundler
+│
+├── nginx/                     # 🌐 NGINX Proxy
+│   ├── app.conf               # Cấu hình Reverse Proxy & Web Server
+│   ├── Dockerfile             
+│   └── nginx.conf             
+│
+├── prisma/                    # 🗄️ ORM & Database Migration
+│   ├── migrations/            # Các bản ghi thay đổi DB
+│   ├── schema.prisma          # Định nghĩa cấu trúc bảng (Schema)
+│   └── seed.ts                # Dữ liệu khởi tạo mẫu
+│
+├── docker-compose.yml         # 🐳 Triển khai Docker toàn bộ hệ thống
+├── Jenkinsfile                # ⚙️ Cấu hình CI/CD Pipeline
+├── CHECKLIST.md               # Tiến độ các công việc của dự án
+├── DESIGN.md                  # Tài liệu thiết kế hệ thống
+└── README.md                  # Tài liệu dự án (File hiện tại)
+```
 
 ---
 

@@ -144,9 +144,9 @@ export const crawlOpenAlexPapers = async (req: Request, res: Response) => {
       totalSaved: savedCount,
     });
   } catch (error) {
+    console.error("crawlOpenAlexPapers error:", error);
     return res.status(500).json({
       message: "Internal server error",
-      error,
     });
   }
 };

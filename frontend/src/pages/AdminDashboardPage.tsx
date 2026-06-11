@@ -13,7 +13,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     // Basic route guard
     const role = localStorage.getItem('user_role');
-    if (role !== 'admin') {
+    if (role !== 'ADMIN') {
       toast.error('Truy cập bị từ chối!');
       navigate('/');
       return;
@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteUser = async (id: string, name: string, role: string) => {
-    if (role === 'admin') {
+    if (role === 'ADMIN') {
       toast.error('Không thể xóa tài khoản Quản trị viên!');
       return;
     }
@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
                     <td className="px-6 py-4 text-muted-foreground">{user.email}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.role === 'admin' 
+                        user.role === 'ADMIN' 
                           ? 'bg-amber-500/10 text-amber-600' 
                           : 'bg-primary/10 text-primary'
                       }`}>
@@ -127,9 +127,9 @@ export default function AdminDashboardPage() {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => handleDeleteUser(user.id, user.fullName, user.role)}
-                        disabled={user.role === 'admin'}
+                        disabled={user.role === 'ADMIN'}
                         className={`p-2 rounded-lg transition-colors ${
-                          user.role === 'admin'
+                          user.role === 'ADMIN'
                             ? 'text-muted-foreground opacity-50 cursor-not-allowed'
                             : 'text-red-500 hover:bg-red-50'
                         }`}

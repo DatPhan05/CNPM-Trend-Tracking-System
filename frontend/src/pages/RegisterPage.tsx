@@ -21,7 +21,7 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const response = await api.post('/auth/register', { name, email, password });
+      const response = await api.post('/auth/register', { fullName: name, email, password });
       toast.success(response.data.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
       navigate('/login');
     } catch (error: any) {

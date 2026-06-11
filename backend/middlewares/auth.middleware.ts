@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("FATAL ERROR: JWT_SECRET environment variable is not defined.");
+}
 
 export const authenticateToken = (
   req: Request,
@@ -14,6 +17,7 @@ export const authenticateToken = (
 
   if (!token) {
     return res.status(401).json({
+      success: false,
       message: "Access token is required",
     });
   }
@@ -26,6 +30,7 @@ export const authenticateToken = (
     next();
   } catch (error) {
     return res.status(403).json({
+      success: false,
       message: "Invalid or expired token",
     });
   }

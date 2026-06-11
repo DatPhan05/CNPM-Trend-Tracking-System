@@ -39,7 +39,7 @@ export const getBookmarks = async (req: any, res: Response): Promise<void> => {
     res.json({ success: true, papers: mappedPapers });
   } catch (error: any) {
     console.error("❌ getBookmarks error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -64,7 +64,7 @@ export const addBookmark = async (req: any, res: Response): Promise<void> => {
     res.status(201).json({ success: true, bookmark });
   } catch (error: any) {
     console.error("❌ addBookmark error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -88,6 +88,6 @@ export const removeBookmark = async (req: any, res: Response): Promise<void> => 
     res.json({ success: true, message: "Bookmark removed successfully." });
   } catch (error: any) {
     console.error("❌ removeBookmark error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

@@ -156,9 +156,9 @@ export const getPaperById = async (req: Request, res: Response) => {
       paper,
     });
   } catch (error) {
+    console.error("getPaperById error:", error);
     return res.status(500).json({
       message: "Internal server error",
-      error,
     });
   }
 };

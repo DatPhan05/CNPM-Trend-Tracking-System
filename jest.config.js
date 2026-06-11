@@ -7,4 +7,7 @@ module.exports = {
   clearMocks: true,
   resetMocks: false,
   restoreMocks: false,
+  // Provide required environment variables for the test environment
+  testEnvironmentOptions: {},
+  setupFiles: ["<rootDir>/jest.setup.js"],
 };

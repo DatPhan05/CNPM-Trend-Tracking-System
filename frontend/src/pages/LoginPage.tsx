@@ -119,24 +119,6 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              <div className="space-y-4">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      localStorage.setItem('access_token', 'fake_invalid_token_123');
-                      const res = await api.get('/auth/me');
-                      toast.success('Refresh Token hoạt động! Dữ liệu: ' + res.data.user.email);
-                    } catch (err) {
-                      toast.error('Lỗi! Interceptor không hoạt động.');
-                    }
-                  }}
-                  className="w-full bg-orange-500 text-white font-semibold rounded-xl py-3 hover:bg-orange-600 transition-colors"
-                >
-                  Test Refresh Token Interceptor
-                </button>
-              </div>
-
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-muted-foreground" />

@@ -6,6 +6,7 @@ jest.mock("../lib/prisma");
 
 describe("🧪 API Integration & Endpoint Unit Tests", () => {
   let token: string;
+  let refreshToken: string;
   let testPaperId: string;
   const testEmail = `testuser_${Date.now()}@gmail.com`;
 
@@ -36,11 +37,13 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
   // Clean up test data after tests finish
   afterAll(async () => {
     // Clean up our test user
-    await prisma.user.deleteMany({
-      where: {
-        email: testEmail,
-      },
-    });
+    try {
+      await prisma.user.deleteMany({
+        where: {
+          email: testEmail,
+        },
+      });
+    } catch (e) {}
     await prisma.$disconnect();
   });
 
@@ -49,10 +52,9 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
       const res = await request(app)
         .post("/api/auth/register")
         .send({
-          name: "Test Developer",
+          fullName: "Test Developer",
           email: testEmail,
           password: "password123",
-          role: "RESEARCHER",
         });
 
       expect(res.status).toBe(201);
@@ -64,7 +66,7 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
       const res = await request(app)
         .post("/api/auth/register")
         .send({
-          name: "Duplicate User",
+          fullName: "Duplicate User",
           email: testEmail,
           password: "password123",
         });
@@ -83,8 +85,9 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.token).toBeDefined();
-      token = res.body.data.token; // Save JWT token for authenticated tests below
+      expect(res.body.access_token).toBeDefined();
+      token = res.body.access_token;
+      refreshToken = res.body.refresh_token;
     });
   });
 
@@ -160,7 +163,7 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
     it("should return a new access_token given a valid refresh_token", async () => {
       const res = await request(app)
         .post("/api/auth/refresh")
-        .send({ refresh_token: token });
+        .send({ refresh_token: refreshToken });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -181,6 +184,48 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
       const res = await request(app)
         .post("/api/auth/refresh")
         .send({ refresh_token: "this.is.not.a.valid.jwt" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+    });
+  });
+
+  describe("👤 Profile and Password Endpoints", () => {
+    it("should successfully update the user profile details", async () => {
+      const res = await request(app)
+        .put("/api/auth/profile")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          fullName: "Updated Test Developer",
+          email: testEmail,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.user.fullName).toBe("Updated Test Developer");
+    });
+
+    it("should successfully change the user password", async () => {
+      const res = await request(app)
+        .put("/api/auth/change-password")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          currentPassword: "password123",
+          newPassword: "newpassword12345",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+
+    it("should fail to change password when current password is wrong", async () => {
+      const res = await request(app)
+        .put("/api/auth/change-password")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          currentPassword: "wrongpassword",
+          newPassword: "anotherpassword",
+        });
 
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);

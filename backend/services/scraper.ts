@@ -82,13 +82,28 @@ export async function scrapeScientificPapers() {
 
         // 4. Create Authors and link to Paper
         for (const authName of authorNames) {
-          // Find or create Author
-          const author = await tx.author.create({
-            data: { name: authName }, // Note: We use unique UUIDs, so creating duplicate names is fine or we can upsert if there was a unique constraint, but schema has no unique name for Author.
+          // Find or create Author (we can use findFirst + create or just create
+          // if we want to allow duplicate names, but for tracking we want unique names)
+          let author = await tx.author.findFirst({
+            where: { name: authName },
           });
-          // Link PaperAuthor
-          await tx.paperAuthor.create({
-            data: {
+
+          if (!author) {
+            author = await tx.author.create({
+              data: { name: authName },
+            });
+          }
+
+          // Link PaperAuthor using upsert to avoid duplicate links
+          await tx.paperAuthor.upsert({
+            where: {
+              paperId_authorId: {
+                paperId: paper.id,
+                authorId: author.id,
+              },
+            },
+            update: {},
+            create: {
               paperId: paper.id,
               authorId: author.id,
             },

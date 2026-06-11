@@ -22,6 +22,7 @@ export const getUsers = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Get users successfully",
       users,
+      count: users.length,
     });
   } catch (error) {
     return res.status(500).json({

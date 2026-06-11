@@ -1,7 +1,11 @@
 import request from "supertest";
 import app from "../app";
+import prisma from "../lib/prisma";
 
 describe("RBAC API", () => {
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
   it("GET /api/users should require access token", async () => {
     const response = await request(app).get("/api/users");
 

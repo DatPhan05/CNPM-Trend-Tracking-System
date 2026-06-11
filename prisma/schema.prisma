@@ -45,6 +45,10 @@ model Paper {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([publicationYear])
+  @@index([journalId])
+  @@index([citationCount])
 }
 
 model Author {

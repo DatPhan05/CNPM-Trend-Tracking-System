@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
     { name: 'Khám phá', path: '/search', icon: Search },
     { name: 'Xu hướng', path: '/trends', icon: TrendingUp },
     ...(isLoggedIn ? [{ name: 'Thư viện', path: '/dashboard', icon: Bookmark }] : []),
-    ...(userRole === 'admin' ? [{ name: 'Quản trị', path: '/admin', icon: ShieldAlert }] : []),
+    ...(userRole === 'ADMIN' ? [{ name: 'Quản trị', path: '/admin', icon: ShieldAlert }] : []),
   ];
 
   if (isMobile) {

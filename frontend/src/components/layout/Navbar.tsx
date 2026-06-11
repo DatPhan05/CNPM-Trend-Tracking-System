@@ -99,12 +99,13 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
             {userName ? (
               <div className="flex items-center gap-4">
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   className="text-sm font-medium text-foreground hover:text-primary transition-colors hidden lg:block"
+                  title="Xem trang cá nhân"
                 >
                   Chào, <span className="text-primary font-semibold">{userName}</span>
                 </Link>
-                {userRole === 'admin' && (
+                {userRole === 'ADMIN' && (
                   <Link
                     to="/admin"
                     className="inline-flex h-9 items-center justify-center rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow transition-all hover:bg-amber-600"
@@ -172,10 +173,15 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
             <div className="h-px w-full bg-border my-2" />
             {userName ? (
               <>
-                <span className="text-base font-medium px-3 py-2 text-foreground">
-                  Chào, {userName}
-                </span>
-                {userRole === 'admin' && (
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 text-base font-medium p-3 rounded-lg hover:bg-muted"
+                >
+                  <UserCircle className="h-5 w-5 text-primary" />
+                  Trang cá nhân ({userName})
+                </Link>
+                {userRole === 'ADMIN' && (
                   <Link
                     to="/admin"
                     onClick={() => setMobileMenuOpen(false)}

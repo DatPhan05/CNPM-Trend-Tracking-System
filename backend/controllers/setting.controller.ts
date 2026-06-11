@@ -14,10 +14,8 @@ export const getSettings = async (req: Request, res: Response) => {
       settings,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    console.error("getSettings error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -40,10 +38,8 @@ export const getSettingByKey = async (req: Request, res: Response) => {
       setting,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    console.error("getSettingByKey error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -82,10 +78,8 @@ export const createSetting = async (req: Request, res: Response) => {
       setting,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    console.error("createSetting error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -118,10 +112,8 @@ export const updateSetting = async (req: Request, res: Response) => {
       setting,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    console.error("updateSetting error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -147,9 +139,7 @@ export const deleteSetting = async (req: Request, res: Response) => {
       message: "Delete setting successfully",
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    console.error("deleteSetting error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

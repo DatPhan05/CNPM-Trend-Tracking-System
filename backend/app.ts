@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
@@ -11,38 +11,44 @@ import crawlerRoutes from "./routes/crawler.routes";
 import paperRoutes from "./routes/paper.routes";
 import bookmarkRoutes from "./routes/bookmark.routes";
 import { getTrends } from "./controllers/paper.controller";
+import prisma from "./lib/prisma";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+}));
 app.use(express.json());
 
 // ── RESTful Constraint #3: Cacheability ──────────────────────────────────────
-// Apply Cache-Control headers so clients and proxies can cache safe responses.
-// GET /api/papers and /api/trends are public, cacheable for 60 seconds.
-// Auth and write endpoints must not be cached.
 app.use((req, res, next) => {
   if (req.method === "GET") {
     const publicPaths = ["/api/papers", "/api/trends"];
     const isPublic = publicPaths.some((p) => req.path.startsWith(p));
     if (isPublic) {
-      // Cache public read-only resources for 60 seconds
       res.set("Cache-Control", "public, max-age=60");
     } else {
-      // Private user data (bookmarks, profile) must not be shared-cached
       res.set("Cache-Control", "private, no-cache");
     }
   } else {
-    // POST / PUT / DELETE responses must never be cached
     res.set("Cache-Control", "no-store");
   }
   next();
 });
 
 app.get("/", (req, res) => {
-  res.json({
-    message: "TrendScholar API is running",
-  });
+  res.json({ message: "Scientific Journal Publication Trend Tracking System API is running" });
+});
+
+// ── Health Check ──────────────────────────────────────────────────────────────
+app.get("/api/health", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: "ok", database: "connected", timestamp: new Date().toISOString() });
+  } catch {
+    res.status(503).json({ status: "error", database: "disconnected", timestamp: new Date().toISOString() });
+  }
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -55,5 +61,15 @@ app.use("/api/crawler", crawlerRoutes);
 app.use("/api/papers", paperRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
 app.get("/api/trends", getTrends);
+
+// ── Global Error Handler ──────────────────────────────────────────────────────
+// Catches any unhandled errors passed via next(err) — never leaks internals
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  console.error("Unhandled error:", err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
+});
 
 export default app;

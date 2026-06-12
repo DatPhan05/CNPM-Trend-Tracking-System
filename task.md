@@ -30,7 +30,7 @@ Dưới đây là tiến độ cập nhật các Task từ file Jira của dự 
 - [/] **CNPM-16** | Task 3.2: Xây dựng và tích hợp trang Authentication (Login, Đăng ký, Quên mật khẩu)
 - [/] **CNPM-17** | Task 3.3: Xây dựng giao diện Admin Dashboard và tích hợp API Quản lý User
 - [x] **CNPM-18** | Task 3.4: Xây dựng trang Profile cá nhân cho User *(Đã hoàn thành & kiểm thử thành công)* 🎉
-- [ ] **CNPM-19** | Task 3.5: Thiết lập Global State Management để quản lý phiên đăng nhập và thông báo
+- [x] **CNPM-19** | Task 3.5: Thiết lập Global State Management để quản lý phiên đăng nhập và thông báo *(Đã hoàn thành)* 🎉
 
 ---
 

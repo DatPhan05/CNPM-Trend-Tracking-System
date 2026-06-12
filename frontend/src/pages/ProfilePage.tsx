@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 interface UserProfile {
   id: string;
@@ -39,7 +40,8 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const isLoggedIn = !!localStorage.getItem('access_token');
+  const { isAuthenticated, updateUser } = useAuth();
+  const isLoggedIn = isAuthenticated;
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -79,10 +81,9 @@ export default function ProfilePage() {
       const updatedUser = res.data.user;
       
       setProfile(updatedUser);
-      localStorage.setItem('user_name', updatedUser.fullName);
       
-      // Dispatch event to sync Navbar
-      window.dispatchEvent(new Event('auth:login'));
+      // Update global context
+      updateUser({ fullName: updatedUser.fullName, email: updatedUser.email });
       
       toast.success('Cập nhật thông tin cá nhân thành công!');
     } catch (err: any) {
@@ -214,6 +215,7 @@ export default function ProfilePage() {
                   <label className="text-sm font-semibold text-foreground">Họ và tên</label>
                   <input
                     type="text"
+                    name="fullName"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -261,6 +263,7 @@ export default function ProfilePage() {
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="password"
+                    name="currentPassword"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     className="w-full bg-secondary/30 border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -277,6 +280,7 @@ export default function ProfilePage() {
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                       type="password"
+                      name="newPassword"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="w-full bg-secondary/30 border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -292,6 +296,7 @@ export default function ProfilePage() {
                     <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                       type="password"
+                      name="confirmPassword"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full bg-secondary/30 border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"

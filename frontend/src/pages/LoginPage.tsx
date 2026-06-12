@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Mail, Lock, ArrowRight, LogIn, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,14 +24,8 @@ export default function LoginPage() {
     try {
       const response = await api.post('/auth/login', { email, password });
       
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('refresh_token', response.data.refresh_token);
-      localStorage.setItem('user_role', response.data.user.role);
-      localStorage.setItem('user_name', response.data.user.name);
-      
-      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
-      
-      window.dispatchEvent(new Event('auth:login'));
+      const { access_token, refresh_token, user } = response.data;
+      login(access_token, refresh_token, user);
       
       toast.success(response.data.message || 'Đăng nhập thành công!');
       navigate('/');

@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: 'html',
   use: {
     // Use the correct frontend port 3001
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
   projects: [

@@ -2,165 +2,130 @@
 
 > Cập nhật lần cuối: 10/06/2026
 
----
-
-## 📄 1. Tài liệu (Documentation)
-
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 1.1 | Viết tài liệu SRS theo chuẩn IEEE 830 | ✅ Hoàn thành | `SRS.md` |
-| 1.2 | Viết CHECKLIST.md tổng hợp các task | ✅ Hoàn thành | `CHECKLIST.md` |
-| 1.3 | Viết task.md theo dõi tiến độ | ✅ Hoàn thành | `task.md` |
-| 1.4 | [CNPM-40] Cập nhật README.md mô tả dự án | ✅ Hoàn thành | `README.md` |
+Dưới đây là bảng phân rã chi tiết các đầu việc (Sub-tasks) tương ứng với các Task trên Jira.
 
 ---
 
-## 🗄️ 2. Database & Schema
+## 🚀 Giai đoạn 1: Khởi tạo và cấu hình dự án (PLAN 1)
 
-| # | Task | Trạng thái | File |
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
 |---|---|:---:|---|
-| 2.1 | Thiết kế schema Prisma (User, Paper, Author, Journal, Keyword, Bookmark, Report, SystemSetting) | ✅ Hoàn thành | `prisma/schema.prisma` |
-| 2.2 | Viết seed data cho môi trường dev | ✅ Hoàn thành | `prisma/seed.ts` |
-| 2.3 | Chạy migrations PostgreSQL | ✅ Hoàn thành | `prisma/migrations/` |
-| 2.4 | Thêm index vào các cột hay query (title, publicationYear) | ⬜ Chưa làm | `prisma/schema.prisma` |
-| 2.5 | Cấu hình `.env` đúng cho local và Docker | ✅ Hoàn thành | `.env`, `.env.example` |
+| **[CNPM-3]** | **Task 1.1: Viết tài liệu đặc tả yêu cầu (SRS) và xác định phạm vi hệ thống** | ✅ Hoàn thành | `SRS.md` |
+| **[CNPM-4]** | **Task 1.2: Vẽ các sơ đồ UML cơ bản** | ✅ Hoàn thành | `diagrams/` |
+| **[CNPM-6]** | **Task 1.3: Thiết kế giao diện cơ bản (Wireframe/UI Design)** | ✅ Hoàn thành | `Figma/Design` |
+| **[CNPM-5]** | **Task 1.4: Khởi tạo source code cho Frontend và Backend** | ✅ Hoàn thành | Github Repo |
+| **[CNPM-7]** | **Task 1.5: Thiết lập quy trình CI/CD cơ bản và môi trường Database local** | ✅ Hoàn thành | `Jenkinsfile`, `.env` |
+| | - Viết Dockerfile cho Backend, Frontend, NGINX | ✅ Hoàn thành | `Dockerfile` |
+| | - Thiết lập Docker Compose 3-tier | ✅ Hoàn thành | `docker-compose.yml` |
+| | - Viết pipeline CI/CD cơ bản với Jenkins | ✅ Hoàn thành | `Jenkinsfile` |
 
 ---
 
-## ⚙️ 3. Backend (Express.js + TypeScript)
+## 💻 Giai đoạn 2: Xây dựng Backend và các API (PLAN 2)
 
-### 3.1 Authentication
-| # | Task | Trạng thái | File |
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
 |---|---|:---:|---|
-| 3.1.1 | API đăng ký (`POST /api/auth/register`) | ✅ Hoàn thành | `auth.controller.ts` |
-| 3.1.2 | API đăng nhập (`POST /api/auth/login`) — JWT 24h | ✅ Hoàn thành | `auth.controller.ts` |
-| 3.1.3 | API lấy thông tin cá nhân (`GET /api/auth/me`) | ✅ Hoàn thành | `auth.controller.ts` |
-| 3.1.4 | Middleware xác thực JWT (`authenticateToken`) | ✅ Hoàn thành | `middlewares/auth.middleware.ts` |
-| 3.1.5 | Middleware phân quyền (`authorizeRoles`) | ✅ Hoàn thành | `middlewares/role.middleware.ts` |
-
-### 3.2 Papers
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 3.2.1 | API lấy/tìm kiếm bài báo (`GET /api/papers`) — unified endpoint | ✅ Hoàn thành | `paper.routes.ts` |
-| 3.2.2 | Hỗ trợ tìm kiếm OpenAlex qua `?mode=openalex` | ✅ Hoàn thành | `paper.controller.ts` |
-| 3.2.3 | API lấy bài báo theo ID (`GET /api/papers/:id`) | ✅ Hoàn thành | `paper.controller.ts` |
-| 3.2.4 | API thống kê xu hướng (`GET /api/trends`) | ✅ Hoàn thành | `paper.controller.ts` |
-| 3.2.5 | ~~Endpoint `/papers/search` riêng biệt~~ → Đã gộp vào `/papers` | ✅ Đã xóa/gộp | — |
-
-### 3.3 Bookmarks
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 3.3.1 | API lấy danh sách bookmark (`GET /api/bookmarks`) | ✅ Đã tối ưu | `bookmark.controller.ts` |
-| 3.3.2 | API thêm bookmark (`POST /api/bookmarks`) | ✅ Hoàn thành | `bookmark.controller.ts` |
-| 3.3.3 | ~~`POST /api/bookmarks/remove`~~ → Sửa thành `DELETE /api/bookmarks/:paperId` | ✅ Đã sửa | `bookmark.routes.ts` |
-| 3.3.4 | Controller đọc `paperId` từ `req.params` thay vì `req.body` | ✅ Đã sửa | `bookmark.controller.ts` |
-
-### 3.4 Users & Settings (Admin)
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 3.4.1 | CRUD người dùng (Admin only) | ✅ Hoàn thành | `user.controller.ts`, `user.routes.ts` |
-| 3.4.2 | CRUD cài đặt hệ thống (Admin only) | ✅ Hoàn thành | `setting.controller.ts`, `setting.routes.ts` |
-| 3.4.3 | ~~Alias `/api/auth/users`~~ → Đã xóa, dùng `/api/users` | ✅ Đã sửa | `app.ts` |
-
-### 3.5 Crawler
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 3.5.1 | API crawl bài báo từ OpenAlex (`GET /api/crawler`) | ✅ Hoàn thành | `crawler.controller.ts` |
-| 3.5.2 | Service gọi OpenAlex API | ✅ Hoàn thành | `services/openAlex.service.ts` |
-
-### 3.6 RESTful & Chất lượng API
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 3.6.1 | Thêm `Cache-Control` headers middleware | ✅ Đã thêm | `app.ts` |
-| 3.6.2 | Tài liệu hóa API bằng Swagger/OpenAPI | ✅ Hoàn thành | `swagger.config.ts`, route files |
-| 3.6.3 | Swagger UI tại `/api-docs` | ✅ Hoàn thành | `app.ts` |
-| 3.6.4 | Thêm pagination cho `GET /api/papers` | ✅ Hoàn thành | `paper.controller.ts` |
-| 3.6.5 | Thêm input validation middleware (express-validator) | ⬜ Chưa làm | — |
+| **[CNPM-9]** | **Task 2.1: Khởi tạo Schema/Models Database và thực hiện kết nối ORM** | ✅ Hoàn thành | `prisma/schema.prisma` |
+| | - Thiết kế các model: User, Paper, Author, Journal... | ✅ Hoàn thành | `schema.prisma` |
+| | - Viết seed data cho môi trường phát triển | ✅ Hoàn thành | `seed.ts` |
+| | - Chạy migration PostgreSQL | ✅ Hoàn thành | `migrations/` |
+| **[CNPM-10]** | **Task 2.2: Xây dựng API Authentication và phân quyền (RBAC)** | ✅ Hoàn thành | `auth.controller.ts` |
+| | - API Đăng ký, Đăng nhập (JWT) | ✅ Hoàn thành | `auth.routes.ts` |
+| | - Middleware xác thực `authenticateToken`, `authorizeRoles` | ✅ Hoàn thành | `auth.middleware.ts` |
+| **[CNPM-11]** | **Task 2.3: Xây dựng các API CRUD cho Quản lý User và Cấu hình** | ✅ Hoàn thành | `user.controller.ts` |
+| | - API CRUD Users (Admin only) | ✅ Hoàn thành | `user.routes.ts` |
+| | - API CRUD System Settings (Admin only) | ✅ Hoàn thành | `setting.routes.ts` |
+| | - API Quản lý Bookmarks (`/api/bookmarks`) | ✅ Hoàn thành | `bookmark.controller.ts` |
+| **[CNPM-12]** | **Task 2.4: Phát triển module Crawler/Scraper thu thập dữ liệu** | ✅ Hoàn thành | `crawler.controller.ts` |
+| | - Gọi dữ liệu bài báo từ OpenAlex API | ✅ Hoàn thành | `openAlex.service.ts` |
+| | - API tìm kiếm/lấy danh sách bài báo (`GET /api/papers`) | ✅ Hoàn thành | `paper.controller.ts` |
+| **[CNPM-13]** | **Task 2.5: Viết Unit Test cho các API và tích hợp Swagger** | ✅ Hoàn thành | `__tests__/` |
+| | - Unit test Auth, Papers, Bookmarks với Jest | ✅ Hoàn thành | `auth.test.ts`, `api.test.ts` |
+| | - Tài liệu hóa API bằng Swagger UI | ✅ Hoàn thành | `swagger.config.ts` |
 
 ---
 
-## 🎨 4. Frontend (React + TypeScript)
+## 🎨 Giai đoạn 3: Phát triển Frontend & Tích hợp User (PLAN 3)
 
-| # | Task | Trạng thái | File |
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
 |---|---|:---:|---|
-| 4.1 | Trang chủ (`/`) | ✅ Hoàn thành | `HomePage.tsx` |
-| 4.2 | Trang đăng ký (`/register`) | ✅ Hoàn thành | `RegisterPage.tsx` |
-| 4.3 | Trang đăng nhập (`/login`) | ✅ Hoàn thành | `LoginPage.tsx` |
-| 4.4 | Trang tìm kiếm (`/search`) — gọi `GET /papers?mode=...` | ✅ Đã cập nhật | `SearchPage.tsx` |
-| 4.5 | Trang xu hướng (`/trends`) — biểu đồ Area + Bar | ✅ Hoàn thành | `TrendsPage.tsx` |
-| 4.6 | Trang admin (`/admin`) — gọi `GET /users` | ✅ Đã cập nhật | `AdminDashboardPage.tsx` |
-| 4.7 | Axios instance với JWT interceptor | ✅ Hoàn thành | `services/api.ts` |
-| 4.8 | UI bookmark: gọi `DELETE /bookmarks/:paperId` | ✅ Hoàn thành | `SearchPage.tsx` / component |
-| 4.9 | Trang dashboard cá nhân (`/dashboard`) | ✅ Hoàn thành | `DashboardPage.tsx` |
-| 4.10 | Trang 404 | ✅ Hoàn thành | `NotFoundPage.tsx` |
-| 4.11 | Responsive design (mobile + collapsible sidebar) | ✅ Hoàn thành | — |
-| 4.12 | [CNPM-15] Thiết lập Layout chính (Navbar, Sidebar, Footer, Routing) | ✅ Hoàn thành | `components/layout/` |
+| **[CNPM-15]** | **Task 3.1: Thiết lập Layout chính** | ✅ Hoàn thành | `components/layout/` |
+| | - Cấu hình Navbar, Sidebar, Footer, Routing | ✅ Hoàn thành | `App.tsx` |
+| | - Trang chủ, Trang 404, Responsive Design | ✅ Hoàn thành | `HomePage.tsx` |
+| **[CNPM-16]** | **Task 3.2: Xây dựng trang Authentication** | ✅ Hoàn thành | `LoginPage.tsx` |
+| | - Giao diện Đăng nhập, Đăng ký | ✅ Hoàn thành | `RegisterPage.tsx` |
+| | - Axios JWT interceptor xử lý Refresh token | ✅ Hoàn thành | `services/api.ts` |
+| **[CNPM-17]** | **Task 3.3: Xây dựng giao diện Admin Dashboard** | ✅ Hoàn thành | `AdminDashboardPage.tsx` |
+| | - Hiển thị danh sách User, API tích hợp | ✅ Hoàn thành | `AdminRoute.tsx` |
+| **[CNPM-18]** | **Task 3.4: Xây dựng trang Profile cá nhân cho User** | ✅ Hoàn thành | `ProfilePage.tsx` |
+| | - Giao diện hiển thị thông tin và đổi mật khẩu | ✅ Hoàn thành | `ProfilePage.tsx` |
+| **[CNPM-19]** | **Task 3.5: Thiết lập Global State Management (AuthContext)** | ✅ Hoàn thành | `AuthContext.tsx` |
+| | - Bọc toàn bộ App với AuthProvider | ✅ Hoàn thành | `main.tsx` |
+| | - Refactor các component để sử dụng `useAuth()` | ✅ Hoàn thành | Nhiều file |
 
 ---
 
-## 🐳 5. DevOps & Hạ tầng
+## 📈 Giai đoạn 4: Xử lý dữ liệu & Phân tích Xu hướng (PLAN 4)
 
-### 5.1 Docker
-| # | Task | Trạng thái | File |
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
 |---|---|:---:|---|
-| 5.1.1 | Dockerfile cho Backend | ✅ Hoàn thành | `backend/Dockerfile` |
-| 5.1.2 | Dockerfile cho Frontend | ✅ Hoàn thành | `frontend/Dockerfile` |
-| 5.1.3 | Dockerfile cho NGINX | ✅ Hoàn thành | `nginx/Dockerfile` |
-| 5.1.4 | Docker Compose 3-tier (postgres + backend + frontend + nginx + pgadmin) | ✅ Hoàn thành | `docker-compose.yml` |
-| 5.1.5 | Health check cho PostgreSQL | ✅ Hoàn thành | `docker-compose.yml` |
-
-### 5.2 NGINX
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 5.2.1 | Cấu hình reverse proxy `/api/*` → Backend | ✅ Hoàn thành | `nginx/app.conf` |
-| 5.2.2 | Cấu hình phục vụ React static files | ✅ Hoàn thành | `nginx/app.conf` |
-| 5.2.3 | SPA fallback (`try_files $uri /index.html`) | ✅ Hoàn thành | `nginx/app.conf` |
-| 5.2.4 | Gzip compression | ✅ Hoàn thành | `nginx/nginx.conf` |
-| 5.2.5 | Proxy `/api-docs` → Swagger UI | ✅ Hoàn thành | `nginx/app.conf` |
-
-### 5.3 CI/CD (Jenkins)
-| # | Task | Trạng thái | File |
-|---|---|:---:|---|
-| 5.3.1 | Stage Checkout | ✅ Hoàn thành | `Jenkinsfile` |
-| 5.3.2 | Stage Install Dependencies | ✅ Hoàn thành | `Jenkinsfile` |
-| 5.3.3 | Stage Lint (parallel: TSC + ESLint) | ✅ Thêm mới | `Jenkinsfile` |
-| 5.3.4 | Stage Test (Jest unit tests) | ✅ Thêm mới | `Jenkinsfile` |
-| 5.3.5 | Stage Build Docker (tagged với BUILD_NUMBER) | ✅ Cải tiến | `Jenkinsfile` |
-| 5.3.6 | Stage Deploy (docker compose up) | ✅ Hoàn thành | `Jenkinsfile` |
-| 5.3.7 | Stage Health Check (port 80 — đã sửa từ 3000) | ✅ Đã sửa | `Jenkinsfile` |
-| 5.3.8 | Post: Email success notification | ✅ Thêm mới | `Jenkinsfile` |
-| 5.3.9 | Post: Email failure notification + cleanup | ✅ Thêm mới | `Jenkinsfile` |
-| 5.3.10 | Post: Docker image prune | ✅ Thêm mới | `Jenkinsfile` |
-| 5.3.11 | Cấu hình SMTP trong Jenkins | ✅ Có tài liệu | `README.md` |
+| **[CNPM-21]** | **Task 4.1: (BE) Xây dựng logic phân tích dữ liệu, tính toán thống kê** | ⬜ Chưa làm | — |
+| **[CNPM-22]** | **Task 4.2: (BE) Xây dựng API trả về dữ liệu phục vụ biểu đồ** | 🔄 Đang làm | `paper.controller.ts` (1 phần) |
+| **[CNPM-23]** | **Task 4.3: (FE) Tích hợp thư viện biểu đồ và xây dựng UI** | 🔄 Đang làm | `TrendsPage.tsx` (1 phần) |
+| **[CNPM-24]** | **Task 4.4: (FE) Tích hợp API và hoàn thiện giao diện Dashboard** | ⬜ Chưa làm | — |
+| **[CNPM-25]** | **Task 4.5: (FE/BE) Hoàn thiện tính năng Lọc (Filter) và Tìm kiếm nâng cao** | 🔄 Đang làm | `SearchPage.tsx` (1 phần) |
 
 ---
 
-## 🧪 6. Kiểm thử (Testing)
+## 📝 Giai đoạn 5: Hoàn thiện Tính năng & Viết tài liệu (PLAN 5)
 
-| # | Task | Trạng thái | Ghi chú |
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
 |---|---|:---:|---|
-| 6.1 | Unit tests backend (Jest + Supertest) | ✅ Hoàn thành | `backend/__tests__/` |
-| 6.2 | Test API auth (register, login, me) | ✅ Hoàn thành | `auth.test.ts` |
-| 6.3 | Test API papers (get, search, trends) | ✅ Hoàn thành | `api.test.ts` |
-| 6.4 | Test API bookmarks (add, get, DELETE /:paperId) | ✅ Hoàn thành | `api.test.ts` |
-| 6.5 | Integration tests với database | ✅ Hoàn thành | Mocks `prisma.ts` |
-| 6.6 | Frontend E2E tests | ⬜ Chưa làm | — |
+| **[CNPM-27]** | **Task 5.1: (BE) Xây dựng tính năng Export Báo cáo (CSV/PDF)** | ⬜ Chưa làm | — |
+| **[CNPM-28]** | **Task 5.2: (FE) Tích hợp Export Báo cáo và làm mượt hiệu ứng/UI** | ⬜ Chưa làm | — |
+| **[CNPM-29]** | **Task 5.3: Hoàn thiện và chuẩn hóa Tài liệu API (Swagger)** | ✅ Hoàn thành | `swagger.config.ts` |
+| **[CNPM-30]** | **Task 5.4: Viết tài liệu Hướng dẫn sử dụng (User Manual) và sơ đồ** | ⬜ Chưa làm | — |
+| **[CNPM-31]** | **Task 5.5: Tối ưu hóa hiệu năng (Code splitting, DB index)** | ⬜ Chưa làm | — |
+
+---
+
+## 🛡️ Giai đoạn 6: Kiểm thử & Triển khai (PLAN 6)
+
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
+|---|---|:---:|---|
+| **[CNPM-33]** | **Task 6.1: Kiểm thử hệ thống và Kiểm thử tích hợp (E2E Testing)** | 🔄 Đang làm | `e2e/full-system.spec.ts` |
+| | - Viết Automation Test với Playwright | ✅ Hoàn thành | `playwright.config.ts` |
+| **[CNPM-34]** | **Task 6.2: Sửa lỗi (Fix bugs) và tinh chỉnh** | 🔄 Đang làm | — |
+| **[CNPM-35]** | **Task 6.3: Đánh giá bảo mật cơ bản (SQL Injection, XSS)** | ⬜ Chưa làm | — |
+| **[CNPM-36]** | **Task 6.4: Deploy Database, Backend, và Frontend lên Cloud** | ⬜ Chưa làm | `nginx/` |
+| **[CNPM-37]** | **Task 6.5: Trình bày tổng kết, đóng gói tài liệu toàn bộ dự án** | ⬜ Chưa làm | — |
+
+---
+
+## 📄 Giai đoạn 7: Viết DOC (PLAN 7)
+
+| Jira ID | Task / Sub-task | Trạng thái | File / Ghi chú |
+|---|---|:---:|---|
+| **[CNPM-39]** | **Task 3.6: Viết DOC (Quản lý dự án, checklist)** | ✅ Hoàn thành | `CHECKLIST.md`, `task.md` |
+| **[CNPM-40]** | **Task 4.6: Viết DOC (Cập nhật thông tin dự án, README)** | ✅ Hoàn thành | `README.md` |
 
 ---
 
 ## 📊 Thống kê tổng quan
 
-| Hạng mục | Hoàn thành | Đang làm | Chưa làm |
-|---|:---:|:---:|:---:|
-| Tài liệu | 5/5 | 0 | 0 |
-| Database | 3/5 | 0 | 2 |
-| Backend | 23/25 | 0 | 2 |
-| Frontend | 12/12 | 0 | 0 |
-| DevOps/Hạ tầng | 15/16 | 0 | 1 |
-| Kiểm thử | 5/6 | 0 | 1 |
-| **Tổng** | **63/69** | **0** | **6** |
+| Giai đoạn | Số lượng Task | Hoàn thành | Đang làm | Chưa làm | Tỷ lệ hoàn thành |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Giai đoạn 1 (Khởi tạo) | 5 | 5 | 0 | 0 | 100% |
+| Giai đoạn 2 (Backend) | 5 | 5 | 0 | 0 | 100% |
+| Giai đoạn 3 (Frontend) | 5 | 5 | 0 | 0 | 100% |
+| Giai đoạn 4 (Phân tích) | 5 | 0 | 3 | 2 | ~30% |
+| Giai đoạn 5 (Hoàn thiện) | 5 | 1 | 0 | 4 | 20% |
+| Giai đoạn 6 (Triển khai) | 5 | 0 | 2 | 3 | ~20% |
+| Giai đoạn 7 (DOC) | 2 | 2 | 0 | 0 | 100% |
+| **Tổng** | **32** | **18** | **5** | **9** | **~56%** |
 
-> **Tiến độ tổng thể: ~90%** ✅
+> **Tiến độ tổng thể (Dựa trên Jira Task): ~56%** 🔄
+> *(Các Task lớn Giai đoạn 1, 2, 3 đã hoàn thành 100%)*
 
 ---
 

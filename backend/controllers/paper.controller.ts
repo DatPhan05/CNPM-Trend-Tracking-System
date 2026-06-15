@@ -225,9 +225,21 @@ export const getTrends = async (req: Request, res: Response): Promise<void> => {
       yearlyMap.set(year, current);
     }
 
-    const yearlyTrends = Array.from(yearlyMap.values()).sort((a, b) => a.year - b.year);
+    const trendSeries = Array.from(yearlyMap.values())
+      .sort((a, b) => a.year - b.year)
+      .map((item) => ({
+        year: String(item.year),
+        count: item.paperCount,
+      }));
 
-    const topKeywords = keywordsWithCounts.map((k) => ({
+    const citationSeries = Array.from(yearlyMap.values())
+      .sort((a, b) => a.year - b.year)
+      .map((item) => ({
+        year: String(item.year),
+        citations: item.citationCount,
+      }));
+
+    const keywordSeries = keywordsWithCounts.map((k) => ({
       id: k.id,
       name: k.name,
       count: k._count.papers,
@@ -246,8 +258,9 @@ export const getTrends = async (req: Request, res: Response): Promise<void> => {
         totalJournals,
         totalKeywords,
         totalCitations,
-        yearlyTrends,
-        topKeywords,
+        trendSeries,
+        citationSeries,
+        keywordSeries,
         topAuthors,
       },
     });

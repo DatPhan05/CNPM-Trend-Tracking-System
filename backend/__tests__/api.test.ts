@@ -118,7 +118,12 @@ describe("🧪 API Integration & Endpoint Unit Tests", () => {
       expect(res.body.success).toBe(true);
       expect(res.body.stats.totalPapers).toBeDefined();
       expect(res.body.stats.totalCitations).toBeDefined();
+      expect(Array.isArray(res.body.stats.yearlyTrends)).toBe(true);
       expect(Array.isArray(res.body.stats.topKeywords)).toBe(true);
+      expect(Array.isArray(res.body.stats.topAuthors)).toBe(true);
+      expect(res.body.stats.yearlyTrends[0]).toHaveProperty("year");
+      expect(res.body.stats.topKeywords[0]).toHaveProperty("name");
+      expect(res.body.stats.topAuthors[0]).toHaveProperty("name");
     });
   });
 

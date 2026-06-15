@@ -8,9 +8,23 @@ export const mockPapers: any[] = [
     title: "Test Paper For Unit Tests",
     abstract: "Abstract summary for testing.",
     doi: "10.1234/test-paper",
-    publicationYear: 2026,
+    publicationYear: 2025,
     citationCount: 15,
     sourceUrl: "http://example.com",
+    sourceProvider: "test",
+    journalId: "journal-id-123",
+    authors: [],
+    keywords: [],
+    journal: { id: "journal-id-123", name: "Nature Test" }
+  },
+  {
+    id: "test-paper-id-456",
+    title: "Another Test Paper",
+    abstract: "A second abstract for analytics testing.",
+    doi: "10.1234/test-paper-2",
+    publicationYear: 2026,
+    citationCount: 25,
+    sourceUrl: "http://example.com/2",
     sourceProvider: "test",
     journalId: "journal-id-123",
     authors: [],
@@ -20,7 +34,14 @@ export const mockPapers: any[] = [
 ];
 export const mockBookmarks: any[] = [];
 export const mockJournals: any[] = [{ id: "journal-id-123", name: "Nature Test" }];
-export const mockKeywords: any[] = [];
+export const mockKeywords: any[] = [
+  { id: "keyword-1", name: "Machine Learning" },
+  { id: "keyword-2", name: "Artificial Intelligence" }
+];
+export const mockAuthors: any[] = [
+  { id: "author-1", name: "Alice Nguyen" },
+  { id: "author-2", name: "Bob Tran" }
+];
 export const mockSettings: any[] = [];
 
 const prismaMock = {
@@ -87,14 +108,20 @@ const prismaMock = {
       return paper || null;
     }),
     findMany: jest.fn().mockImplementation(async (args) => {
+      if (args?.select?.publicationYear) {
+        return mockPapers.map(p => ({
+          publicationYear: p.publicationYear,
+          citationCount: p.citationCount,
+        }));
+      }
       const keyword = args?.where?.OR?.[0]?.title?.contains;
       if (keyword && keyword !== "machine learning") {
         return mockPapers.filter(p => p.title.toLowerCase().includes(keyword.toLowerCase()));
       }
       return mockPapers;
     }),
-    count: jest.fn().mockResolvedValue(1),
-    aggregate: jest.fn().mockResolvedValue({ _sum: { citationCount: 15 } }),
+    count: jest.fn().mockResolvedValue(mockPapers.length),
+    aggregate: jest.fn().mockResolvedValue({ _sum: { citationCount: mockPapers.reduce((sum, paper) => sum + (paper.citationCount || 0), 0) } }),
   },
   journal: {
     count: jest.fn().mockResolvedValue(1),
@@ -111,8 +138,21 @@ const prismaMock = {
     }),
   },
   keyword: {
-    count: jest.fn().mockResolvedValue(0),
-    findMany: jest.fn().mockResolvedValue([]),
+    count: jest.fn().mockResolvedValue(mockKeywords.length),
+    findMany: jest.fn().mockResolvedValue(
+      mockKeywords.map((keyword, index) => ({
+        ...keyword,
+        _count: { papers: index === 0 ? 2 : 1 },
+      }))
+    ),
+  },
+  author: {
+    findMany: jest.fn().mockResolvedValue(
+      mockAuthors.map((author, index) => ({
+        ...author,
+        _count: { papers: index === 0 ? 2 : 1 },
+      }))
+    ),
   },
   bookmark: {
     findMany: jest.fn().mockImplementation(async (args) => {

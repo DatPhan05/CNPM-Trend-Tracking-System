@@ -165,37 +165,90 @@ export const getPaperById = async (req: Request, res: Response) => {
 
 export const getTrends = async (req: Request, res: Response): Promise<void> => {
   try {
-    const totalPapers = await prisma.paper.count();
-    const totalJournals = await prisma.journal.count();
-    const totalKeywords = await prisma.keyword.count();
+    const [totalPapers, totalJournals, totalKeywords, citationAgg, papers, keywordsWithCounts, authorsWithCounts] =
+      await Promise.all([
+        prisma.paper.count(),
+        prisma.journal.count(),
+        prisma.keyword.count(),
+        prisma.paper.aggregate({
+          _sum: {
+            citationCount: true,
+          },
+        }),
+        prisma.paper.findMany({
+          select: {
+            publicationYear: true,
+            citationCount: true,
+          },
+        }),
+        prisma.keyword.findMany({
+          select: {
+            id: true,
+            name: true,
+            _count: {
+              select: { papers: true },
+            },
+          },
+          orderBy: {
+            papers: {
+              _count: "desc",
+            },
+          },
+          take: 6,
+        }),
+        prisma.author.findMany({
+          select: {
+            id: true,
+            name: true,
+            _count: {
+              select: { papers: true },
+            },
+          },
+          orderBy: {
+            papers: {
+              _count: "desc",
+            },
+          },
+          take: 6,
+        }),
+      ]);
 
-    const citationAgg = await prisma.paper.aggregate({
-      _sum: {
-        citationCount: true,
-      },
-    });
     const totalCitations = citationAgg._sum.citationCount || 0;
 
-    const keywordsWithCounts = await prisma.keyword.findMany({
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: { papers: true },
-        },
-      },
-      orderBy: {
-        papers: {
-          _count: "desc",
-        },
-      },
-      take: 6,
-    });
+    const yearlyMap = new Map<number, { year: number; paperCount: number; citationCount: number }>();
+    for (const paper of papers) {
+      if (!paper.publicationYear) continue;
+      const year = paper.publicationYear;
+      const current = yearlyMap.get(year) || { year, paperCount: 0, citationCount: 0 };
+      current.paperCount += 1;
+      current.citationCount += paper.citationCount || 0;
+      yearlyMap.set(year, current);
+    }
 
-    const topKeywords = keywordsWithCounts.map((k) => ({
+    const trendSeries = Array.from(yearlyMap.values())
+      .sort((a, b) => a.year - b.year)
+      .map((item) => ({
+        year: String(item.year),
+        count: item.paperCount,
+      }));
+
+    const citationSeries = Array.from(yearlyMap.values())
+      .sort((a, b) => a.year - b.year)
+      .map((item) => ({
+        year: String(item.year),
+        citations: item.citationCount,
+      }));
+
+    const keywordSeries = keywordsWithCounts.map((k) => ({
       id: k.id,
       name: k.name,
       count: k._count.papers,
+    }));
+
+    const topAuthors = authorsWithCounts.map((author) => ({
+      id: author.id,
+      name: author.name,
+      count: author._count.papers,
     }));
 
     res.json({
@@ -205,7 +258,10 @@ export const getTrends = async (req: Request, res: Response): Promise<void> => {
         totalJournals,
         totalKeywords,
         totalCitations,
-        topKeywords,
+        trendSeries,
+        citationSeries,
+        keywordSeries,
+        topAuthors,
       },
     });
   } catch (error: any) {

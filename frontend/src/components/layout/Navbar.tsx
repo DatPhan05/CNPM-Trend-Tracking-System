@@ -2,27 +2,15 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, TrendingUp, BookOpen, UserCircle, Menu, X, Zap, Bookmark } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/utils/cn';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSidebar?: () => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
 
-  const checkAuth = () => {
-    setUserName(localStorage.getItem('user_name'));
-    setUserRole(localStorage.getItem('user_role'));
-  };
-
   useEffect(() => {
-    checkAuth();
-    window.addEventListener('auth:login', checkAuth);
-    window.addEventListener('auth:unauthorized', () => {
-      setUserName(null);
-      setUserRole(null);
-    });
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -33,16 +21,11 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
   const navLinks = [
     { name: 'Khám phá', path: '/search', icon: Search },
     { name: 'Xu hướng', path: '/trends', icon: TrendingUp },
-    ...(userName ? [{ name: 'Thư viện', path: '/dashboard', icon: Bookmark }] : []),
+    ...(isAuthenticated ? [{ name: 'Thư viện', path: '/dashboard', icon: Bookmark }] : []),
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_name');
-    setUserName(null);
-    setUserRole(null);
+    logout();
   };
 
   return (
@@ -96,16 +79,16 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            {userName ? (
+            {isAuthenticated && user ? (
               <div className="flex items-center gap-4">
                 <Link
                   to="/profile"
                   className="text-sm font-medium text-foreground hover:text-primary transition-colors hidden lg:block"
                   title="Xem trang cá nhân"
                 >
-                  Chào, <span className="text-primary font-semibold">{userName}</span>
+                  Chào, <span className="text-primary font-semibold">{user.fullName}</span>
                 </Link>
-                {userRole === 'ADMIN' && (
+                {user.role === 'ADMIN' && (
                   <Link
                     to="/admin"
                     className="inline-flex h-9 items-center justify-center rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow transition-all hover:bg-amber-600"
@@ -144,7 +127,7 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
         <button
           className="md:hidden text-foreground p-2"
           onClick={() => {
-            if (userName && onToggleMobileSidebar) {
+            if (isAuthenticated && onToggleMobileSidebar) {
               onToggleMobileSidebar();
             } else {
               setMobileMenuOpen(!mobileMenuOpen);
@@ -171,7 +154,7 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
               </Link>
             ))}
             <div className="h-px w-full bg-border my-2" />
-            {userName ? (
+            {isAuthenticated && user ? (
               <>
                 <Link
                   to="/profile"
@@ -179,9 +162,9 @@ export default function Navbar({ onToggleMobileSidebar }: { onToggleMobileSideba
                   className="flex items-center gap-3 text-base font-medium p-3 rounded-lg hover:bg-muted"
                 >
                   <UserCircle className="h-5 w-5 text-primary" />
-                  Trang cá nhân ({userName})
+                  Trang cá nhân ({user.fullName})
                 </Link>
-                {userRole === 'ADMIN' && (
+                {user.role === 'ADMIN' && (
                   <Link
                     to="/admin"
                     onClick={() => setMobileMenuOpen(false)}

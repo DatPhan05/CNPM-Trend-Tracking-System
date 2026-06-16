@@ -1,22 +1,20 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-
-interface TokenPayload {
-  role?: string;
-}
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminRoute() {
-  const token = localStorage.getItem('access_token');
-  if (!token) {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Đang tải...</div>;
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  try {
-    const decoded = jwtDecode<TokenPayload>(token);
-    if (decoded.role?.toUpperCase() !== 'ADMIN') {
-      return <Navigate to="/" replace />;
-    }
-  } catch {
-    return <Navigate to="/login" replace />;
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
   }
+
   return <Outlet />;
 }

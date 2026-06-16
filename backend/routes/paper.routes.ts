@@ -81,13 +81,34 @@ router.get("/", (req, res) => {
  * @swagger
  * /api/papers/trends:
  *   get:
- *     summary: Get research trends and top keywords
+ *     summary: Get research trend, citation, and keyword chart data
  *     tags: [Papers]
  *     responses:
  *       200:
- *         description: Aggregated trend statistics
+ *         description: Aggregated chart-ready statistics for trends, citations, keywords, and authors
  */
 router.get("/trends", getTrends);
+
+/**
+ * @swagger
+ * /api/papers/{id}:
+ *   get:
+ *     summary: Get a scientific paper by ID
+ *     tags: [Papers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: UUID of the paper
+ *     responses:
+ *       200:
+ *         description: Paper found
+ *       404:
+ *         description: Paper not found
+ */
+router.get("/:id", getPaperById);
 
 /**
  * @swagger

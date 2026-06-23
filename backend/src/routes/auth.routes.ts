@@ -2,7 +2,7 @@ import { Router } from "express";
 import { getMe, login, register, refreshToken, updateProfile, changePassword, forgotPassword } from "../controllers/auth.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { validateBody } from "../middlewares/validate.middleware";
-import { loginSchema, refreshTokenSchema, registerSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema } from "../schemas/validation.schemas";
+import { loginSchema, refreshTokenSchema, registerSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema } from "../validators/validation.schemas";
 
 const router = Router();
 

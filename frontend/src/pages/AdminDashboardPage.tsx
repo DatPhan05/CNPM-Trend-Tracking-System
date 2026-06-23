@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Trash2, ShieldAlert, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '@/services/api';
+import api from '@/api/api';
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();

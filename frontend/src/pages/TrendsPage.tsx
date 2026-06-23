@@ -1,26 +1,49 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { TrendingUp, Award, Clock } from 'lucide-react';
-
-const yearlyData = [
-  { year: '2019', ML: 4000, AI: 2400, CS: 2400 },
-  { year: '2020', ML: 5000, AI: 3000, CS: 2800 },
-  { year: '2021', ML: 6500, AI: 4200, CS: 3100 },
-  { year: '2022', ML: 8200, AI: 5800, CS: 3600 },
-  { year: '2023', ML: 11000, AI: 8900, CS: 4200 },
-  { year: '2024', ML: 14500, AI: 13200, CS: 4900 },
-];
-
-const topicData = [
-  { topic: 'Large Language Models', count: 1240 },
-  { topic: 'Computer Vision', count: 980 },
-  { topic: 'Transformers', count: 850 },
-  { topic: 'Reinforcement Learning', count: 640 },
-  { topic: 'Bioinformatics', count: 520 },
-];
+import { useState, useEffect } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, Award, Clock, Loader2, PieChart as PieChartIcon } from 'lucide-react';
+import toast from 'react-hot-toast';
+import api from '@/api/api';
 
 export default function TrendsPage() {
+  const [loading, setLoading] = useState(true);
+  const [overview, setOverview] = useState<any>(null);
+  const [trends, setTrends] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const [overviewRes, trendsRes, categoriesRes] = await Promise.all([
+          api.get('/analytics/overview'),
+          api.get('/analytics/trends'),
+          api.get('/analytics/categories'),
+        ]);
+
+        setOverview(overviewRes.data.data);
+        setTrends(trendsRes.data.data);
+        setCategories(categoriesRes.data.data);
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error);
+        toast.error('Không thể tải dữ liệu thống kê');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 md:px-6 py-24 flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+        <p className="text-muted-foreground font-medium animate-pulse">Đang tải dữ liệu phân tích...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 md:px-6 py-8">
+    <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-display font-bold text-foreground mb-2 flex items-center gap-3">
@@ -37,24 +60,24 @@ export default function TrendsPage() {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Tổng xuất bản (2024)</p>
-              <h3 className="text-3xl font-bold mt-2 text-foreground">32,600</h3>
+              <p className="text-sm font-medium text-muted-foreground">Tổng bài báo xuất bản</p>
+              <h3 className="text-3xl font-bold mt-2 text-foreground">{overview?.totalPapers?.toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-xl">
               <TrendingUp className="h-5 w-5 text-emerald-500" />
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm font-medium text-emerald-500">
-            <span>+18.4%</span>
-            <span className="text-muted-foreground ml-2 font-normal">so với năm ngoái</span>
+            <span>+{overview?.newPapersThisMonth}</span>
+            <span className="text-muted-foreground ml-2 font-normal">bài báo mới trong tháng này</span>
           </div>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Top Chủ đề</p>
-              <h3 className="text-2xl font-bold mt-2 text-foreground">Artificial Intelligence</h3>
+              <p className="text-sm font-medium text-muted-foreground">Tạp chí / Danh mục</p>
+              <h3 className="text-3xl font-bold mt-2 text-foreground">{overview?.totalJournals?.toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-amber-500/10 rounded-xl">
               <Award className="h-5 w-5 text-amber-500" />
@@ -62,24 +85,24 @@ export default function TrendsPage() {
           </div>
           <div className="mt-4 flex items-center text-sm">
             <span className="px-2 py-0.5 bg-secondary text-secondary-foreground rounded-md text-xs font-medium mr-2">
-              LLMs
+              Top 1
             </span>
-            <span className="text-muted-foreground text-xs">Phát triển mạnh nhất</span>
+            <span className="text-muted-foreground text-xs truncate max-w-[150px]">{categories?.[0]?.name || 'N/A'}</span>
           </div>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Dữ liệu cập nhật</p>
-              <h3 className="text-xl font-bold mt-2 text-foreground">15 phút trước</h3>
+              <p className="text-sm font-medium text-muted-foreground">Tổng Tác giả</p>
+              <h3 className="text-3xl font-bold mt-2 text-foreground">{overview?.totalAuthors?.toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-blue-500/10 rounded-xl">
               <Clock className="h-5 w-5 text-blue-500" />
             </div>
           </div>
           <div className="mt-4 text-sm text-muted-foreground">
-            Sử dụng API từ Semantic Scholar
+            Sử dụng dữ liệu từ Database hệ thống
           </div>
         </div>
       </div>
@@ -88,18 +111,14 @@ export default function TrendsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Area Chart */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm lg:col-span-2">
-          <h3 className="text-lg font-bold text-foreground mb-6">Tốc độ xuất bản qua các năm (CS vs AI vs ML)</h3>
+          <h3 className="text-lg font-bold text-foreground mb-6">Tốc độ xuất bản qua các năm</h3>
           <div className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={yearlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <AreaChart data={trends} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorAI" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorML" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="year" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -108,11 +127,10 @@ export default function TrendsPage() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
                   itemStyle={{ color: 'hsl(var(--foreground))' }}
+                  labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold', marginBottom: '8px' }}
                 />
                 <Legend />
-                <Area type="monotone" dataKey="AI" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorAI)" />
-                <Area type="monotone" dataKey="ML" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorML)" />
-                <Area type="monotone" dataKey="CS" stroke="#f59e0b" strokeWidth={2} fill="none" strokeDasharray="5 5" />
+                <Area name="Số lượng bài báo" type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -120,35 +138,78 @@ export default function TrendsPage() {
 
         {/* Bar Chart */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-foreground mb-6">Top Chủ Đề Nổi Bật (Tháng này)</h3>
+          <h3 className="text-lg font-bold text-foreground mb-6">Top Tạp chí Nổi Bật</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topicData} layout="vertical" margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
+              <BarChart data={categories} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
                 <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis dataKey="topic" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={120} />
+                <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={120} tickFormatter={(value) => value.length > 15 ? value.substring(0, 15) + '...' : value} />
                 <Tooltip 
                   cursor={{fill: 'var(--muted)', opacity: 0.2}}
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+                  formatter={(value) => [value, 'Số bài báo']}
                 />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} />
+                <Bar name="Số lượng bài báo" dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Insights Card */}
-        <div className="bg-primary text-primary-foreground rounded-2xl p-8 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-xl font-bold mb-4">AI Insights</h3>
-            <p className="text-primary-foreground/80 leading-relaxed">
-              Mô hình học máy của chúng tôi dự báo rằng các chủ đề liên quan đến <strong>"Large Language Models"</strong> và <strong>"Generative AI"</strong> sẽ tiếp tục thống trị các hội nghị khoa học trong năm tới, chiếm khoảng 45% tổng số bài báo đệ trình tại NeurIPS và ICML.
-            </p>
+        {/* Pie Chart */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+            <PieChartIcon className="h-5 w-5 text-primary" /> Tỷ lệ phân bổ theo Tạp chí
+          </h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={categories}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name.length > 10 ? name.substring(0,10)+'...' : name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {categories.map((entry, index) => {
+                    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+                    return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                  })}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+                  formatter={(value) => [value, 'Số bài báo']}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-          <button className="mt-8 bg-white text-primary px-6 py-3 rounded-xl font-bold w-full hover:bg-white/90 transition-colors">
-            Tải báo cáo chi tiết
-          </button>
+        </div>
+
+        {/* Insights Card */}
+        <div className="bg-primary text-primary-foreground rounded-2xl p-8 shadow-sm flex flex-col justify-between lg:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">Insights & Phân tích</h3>
+              <p className="text-primary-foreground/90 leading-relaxed mb-4">
+                Hệ thống hiện tại đang quản lý <strong>{overview?.totalPapers}</strong> bài báo khoa học. 
+                Tạp chí dẫn đầu với lượng xuất bản lớn nhất là <strong>{categories?.[0]?.name}</strong> với {categories?.[0]?.value} bài báo.
+              </p>
+              <p className="text-primary-foreground/90 leading-relaxed">
+                Bạn có thể dễ dàng theo dõi mức độ tăng trưởng xuất bản, và phát hiện các xu hướng sớm dựa trên trực quan hóa dữ liệu từ nền tảng Trend Tracking.
+              </p>
+            </div>
+            <div className="flex flex-col justify-center">
+              <button className="bg-white text-primary px-6 py-3 rounded-xl font-bold w-full hover:bg-white/90 transition-colors shadow-lg">
+                Tải báo cáo phân tích (PDF)
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

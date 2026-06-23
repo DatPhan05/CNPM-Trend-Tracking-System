@@ -1,5 +1,5 @@
 import { Response } from "express";
-import prisma from "../lib/prisma";
+import prisma from "../helpers/prisma";
 
 export const getBookmarks = async (req: any, res: Response): Promise<void> => {
   try {

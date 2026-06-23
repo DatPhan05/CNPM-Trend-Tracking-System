@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import api from '@/services/api';
+import api from '@/api/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {

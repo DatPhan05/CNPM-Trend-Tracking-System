@@ -15,7 +15,7 @@ WORKDIR /app
 
 # Copy root package files
 COPY package.json package-lock.json tsconfig.json ./
-COPY prisma ./prisma/
+COPY backend/prisma ./backend/prisma/
 
 # Install all dependencies (including devDependencies for TypeScript build)
 RUN npm ci
@@ -35,7 +35,7 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-COPY prisma ./prisma/
+COPY backend/prisma ./backend/prisma/
 
 # Install production dependencies only
 RUN npm ci --omit=dev
@@ -46,4 +46,4 @@ COPY --from=builder /app/dist ./dist/
 
 EXPOSE 8080
 
-CMD ["node", "dist/backend/server.js"]
+CMD ["node", "dist/backend/src/server.js"]

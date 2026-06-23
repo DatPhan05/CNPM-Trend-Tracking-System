@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../app";
-import prisma from "../lib/prisma";
+import prisma from "../helpers/prisma";
 
 describe("RBAC API", () => {
   afterAll(async () => {

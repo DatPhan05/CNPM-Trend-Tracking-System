@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { register, login } from "../controllers/auth.controller";
 import { getPapers, getTrends, searchPapers } from "../controllers/paper.controller";
 import { getBookmarks, addBookmark, removeBookmark } from "../controllers/bookmark.controller";
+import analyticsRoutes from "./analytics.routes";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-jwt-key-antigravity";
 
@@ -200,5 +201,7 @@ router.post("/bookmarks", authenticateToken, addBookmark);
  *         description: Chưa đăng nhập
  */
 router.post("/bookmarks/remove", authenticateToken, removeBookmark);
+
+router.use("/analytics", analyticsRoutes);
 
 export default router;

@@ -16,6 +16,7 @@ export default function RootLayout() {
 
   // Close mobile sidebar on navigation
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileSidebarOpen(false);
   }, [location.pathname]);
 

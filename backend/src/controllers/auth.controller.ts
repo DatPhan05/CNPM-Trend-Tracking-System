@@ -343,7 +343,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
 
     if (user) {
-      console.log(`[MOCK EMAIL] Sent password reset link to ${email}`);
+      // Log disabled for production: console.log(`[MOCK EMAIL] Sent password reset link to ${email}`);
     }
 
     return res.status(200).json({

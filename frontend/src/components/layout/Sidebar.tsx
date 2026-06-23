@@ -4,7 +4,6 @@ import {
   TrendingUp, 
   Bookmark, 
   ShieldAlert, 
-  Menu, 
   X, 
   Home,
   ChevronLeft,

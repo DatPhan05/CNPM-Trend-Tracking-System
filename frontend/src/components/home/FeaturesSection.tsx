@@ -1,4 +1,4 @@
-import { BarChart3, LineChart, PieChart, Search, Bookmark, BellRing } from 'lucide-react';
+import { BarChart3, Search, BookOpen, Users, TrendingUp, Sparkles, Database, FileText } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 const features = [

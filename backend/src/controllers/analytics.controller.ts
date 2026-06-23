@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../helpers/prisma';
+import { Parser } from 'json2csv';
+import PDFDocument from 'pdfkit';
 
 /**
  * Get overview statistics
@@ -143,6 +145,74 @@ export const getTopAuthors = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error fetching analytics top authors:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+/**
+ * Export papers data as CSV
+ * @route GET /api/analytics/export/csv
+ */
+export const exportCsv = async (req: Request, res: Response) => {
+  try {
+    const papers = await prisma.paper.findMany({
+      include: {
+        journal: true,
+      },
+      orderBy: { citationCount: 'desc' }
+    });
+
+    const data = papers.map(p => ({
+      Title: p.title,
+      Year: p.publicationYear || 'N/A',
+      Citations: p.citationCount,
+      Journal: p.journal?.name || p.sourceProvider || 'N/A'
+    }));
+
+    const parser = new Parser();
+    const csv = parser.parse(data);
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment('papers_report.csv');
+    res.send(csv);
+  } catch (error) {
+    console.error('Error exporting CSV:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+/**
+ * Export analytics report as PDF
+ * @route GET /api/analytics/export/pdf
+ */
+export const exportPdf = async (req: Request, res: Response) => {
+  try {
+    const papers = await prisma.paper.findMany({
+      take: 20,
+      orderBy: { citationCount: 'desc' }
+    });
+
+    const doc = new PDFDocument({ margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="analytics_report.pdf"');
+    
+    // Pipe directly to HTTP response
+    doc.pipe(res);
+
+    doc.fontSize(20).text('Scientific Journal Trend Tracker', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(16).text('Top Cited Papers Report', { underline: true });
+    doc.moveDown();
+
+    papers.forEach((p, i) => {
+      doc.fontSize(12).text(`${i + 1}. ${p.title} (${p.publicationYear || 'N/A'})`);
+      doc.fontSize(10).fillColor('gray').text(`Citations: ${p.citationCount}`).moveDown(0.5);
+      doc.fillColor('black');
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error('Error exporting PDF:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };

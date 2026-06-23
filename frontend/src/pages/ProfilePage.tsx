@@ -12,7 +12,7 @@ import {
   ChevronRight,
   BookOpen
 } from 'lucide-react';
-import api from '@/services/api';
+import api from '@/api/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 

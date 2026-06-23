@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, SlidersHorizontal, BookOpen, Star, ExternalLink, Calendar, Users, Database, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import api from '@/services/api';
+import api from '@/api/api';
 import toast from 'react-hot-toast';
 
 interface Paper {

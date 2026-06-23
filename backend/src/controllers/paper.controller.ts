@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../lib/prisma";
+import prisma from "../helpers/prisma";
 import axios from "axios";
 
 // Helper function to reconstruct OpenAlex abstract

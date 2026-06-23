@@ -303,7 +303,7 @@ export const searchPapers = async (req: Request, res: Response): Promise<void> =
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = parseInt(req.query.limit as string, 10) || 10;
 
-    console.log(`🔍 Searching OpenAlex for keyword: "${keyword}"`);
+    // Log disabled for production: console.log(`🔍 Searching OpenAlex for keyword: "${keyword}"`);
     const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(keyword)}&page=${page}&per-page=${limit}`;
     const response = await axios.get(openAlexUrl, {
       headers: { "User-Agent": "ScientificJournalTrendTracker/1.0 (mailto:admin@trendtracking.com)" }

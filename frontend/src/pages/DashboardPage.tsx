@@ -19,6 +19,7 @@ import {
 import api from '@/api/api';
 import toast from 'react-hot-toast';
 import { cn } from '@/utils/cn';
+import { getErrorMessage } from '@/utils/error';
 
 interface Paper {
   id: string | number;
@@ -91,9 +92,10 @@ export default function DashboardPage() {
     try {
       await api.delete(`/bookmarks/${pId}`);
       setBookmarks(prev => prev.filter(p => String(p.id) !== pId));
-      toast.success('Đã xóa bài viết khỏi danh sách lưu trữ');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Không thể xóa bookmark');
+      toast.success('Đã xóa bài báo thành công!');
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err, 'Không thể xóa bài báo'));
     } finally {
       setRemovingId(null);
     }

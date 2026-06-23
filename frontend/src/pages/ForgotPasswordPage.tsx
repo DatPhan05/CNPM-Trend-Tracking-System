@@ -3,6 +3,7 @@ import { BookOpen, Mail, ArrowLeft, Send } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
+import { getErrorMessage } from '@/utils/error';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -18,12 +19,13 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      await api.post('/auth/forgot-password', { email });
+      const response = await api.post('/auth/forgot-password', { email });
       setSubmitted(true);
-      toast.success('Yêu cầu đã được gửi!');
-    } catch (error: any) {
-      const msg = error.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
-      toast.error(msg);
+      toast.success(response.data.message || 'Link khôi phục đã được gửi!');
+      navigate('/login');
+    } catch (error) {
+      console.error(error);
+      toast.error(getErrorMessage(error, 'Có lỗi xảy ra, vui lòng thử lại'));
     } finally {
       setIsLoading(false);
     }

@@ -1,29 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Trash2, ShieldAlert, Loader2, FileText, BookOpen, PenTool } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
 
+interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, admins: 0 });
   const [analytics, setAnalytics] = useState({ papers: 0, journals: 0, authors: 0 });
 
-  useEffect(() => {
-    // Basic route guard
-    const role = localStorage.getItem('user_role');
-    if (role !== 'ADMIN') {
-      toast.error('Truy cập bị từ chối!');
-      navigate('/');
-      return;
-    }
-
-    fetchData();
-  }, [navigate]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       // Fetch users and analytics in parallel
       const [usersRes, analyticsRes] = await Promise.all([
@@ -34,7 +30,7 @@ export default function AdminDashboardPage() {
       setUsers(usersRes.data.users);
       setStats({
         total: usersRes.data.count,
-        admins: usersRes.data.users.filter((u: any) => u.role === 'ADMIN').length
+        admins: usersRes.data.users.filter((u: { role: string }) => u.role === 'ADMIN').length
       });
 
       if (analyticsRes.data.success) {
@@ -44,12 +40,25 @@ export default function AdminDashboardPage() {
           authors: analyticsRes.data.data.totalAuthors,
         });
       }
-    } catch (error) {
+    } catch {
       toast.error('Lỗi khi tải dữ liệu trang quản trị');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Basic route guard
+    const role = localStorage.getItem('user_role');
+    if (role !== 'ADMIN') {
+      toast.error('Truy cập bị từ chối!');
+      navigate('/');
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [navigate, fetchData]);
 
   const handleDeleteUser = async (id: string, name: string, role: string) => {
     if (role === 'ADMIN') {
@@ -65,7 +74,7 @@ export default function AdminDashboardPage() {
       await api.delete(`/users/${id}`);
       toast.success('Đã xóa tài khoản thành công');
       fetchData(); // Refresh list
-    } catch (error) {
+    } catch {
       toast.error('Lỗi khi xóa tài khoản');
     }
   };

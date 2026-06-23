@@ -4,6 +4,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
 import { useAuth } from '@/context/AuthContext';
+import { getErrorMessage } from '@/utils/error';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -29,10 +30,9 @@ export default function LoginPage() {
       
       toast.success(response.data.message || 'Đăng nhập thành công!');
       navigate('/');
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || 'Đăng nhập thất bại, vui lòng thử lại';
-      toast.error(msg);
+      toast.error(getErrorMessage(error, 'Đăng nhập thất bại, vui lòng thử lại'));
     } finally {
       setIsLoading(false);
     }

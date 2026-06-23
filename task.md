@@ -40,7 +40,7 @@ Dưới đây là tiến độ cập nhật các Task từ file Jira của dự 
 - [x] **CNPM-22** | Task 4.2: (BE) Xây dựng API trả về dữ liệu phục vụ biểu đồ
 - [x] **CNPM-23** | Task 4.3: (FE) Tích hợp thư viện biểu đồ (Recharts, Chart.js) và xây dựng UI
 - [x] **CNPM-24** | Task 4.4: (FE) Tích hợp API và hoàn thiện giao diện Dashboard
-- [ ] **CNPM-25** | Task 4.5: (FE/BE) Hoàn thiện tính năng Lọc (Filter) và Tìm kiếm nâng cao
+- [x] **CNPM-25** | Task 4.5: (FE/BE) Hoàn thiện tính năng Lọc (Filter) và Tìm kiếm nâng cao
 
 ---
 

@@ -23,6 +23,9 @@ export default function SearchPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedJournals, setSelectedJournals] = useState<string[]>([]);
+  const [sortOption, setSortOption] = useState<string>('relevance');
   // Track which paper IDs are bookmarked by current user
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
@@ -32,10 +35,20 @@ export default function SearchPage() {
   const fetchPapers = async (searchQuery: string, page: number = 1) => {
     setIsSearching(true);
     try {
-      // RESTful: unified GET /papers endpoint with query params
-      // mode=openalex → OpenAlex API, mode=local (default) → internal DB
+      const year = selectedYears.map(y => y === 'Cũ hơn' ? 'older' : y).join(',');
+      const journal = selectedJournals.join(',');
+      const sort = sortOption === 'Mới nhất' ? 'newest' : sortOption === 'Trích dẫn nhiều nhất' ? 'citations' : 'relevance';
+
       const response = await api.get('/papers', {
-        params: { keyword: searchQuery || 'machine learning', mode, page, limit: 10 }
+        params: { 
+          keyword: searchQuery || 'machine learning', 
+          mode, 
+          page, 
+          limit: 10,
+          ...(year && { year }),
+          ...(journal && { journal }),
+          ...(sort !== 'relevance' && { sort })
+        }
       });
       setPapers(response.data.data || response.data.papers || []);
       setTotalPages(response.data.meta?.totalPages || 1);
@@ -62,14 +75,13 @@ export default function SearchPage() {
     }
   };
 
-  // Fetch initial data or let user search first
   useEffect(() => {
-    if (mode === 'mock') {
+    if (mode === 'mock' || hasSearched) {
       setCurrentPage(1);
-      fetchPapers('', 1);
+      fetchPapers(query, 1);
     }
     fetchBookmarks();
-  }, [mode]);
+  }, [mode, selectedYears, selectedJournals, sortOption]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,9 +198,17 @@ export default function SearchPage() {
               Lọc theo năm
             </div>
             <div className="space-y-3">
-              {['2024', '2023', '2022', '2021', 'Cũ hơn'].map((year) => (
+              {['2026', '2025', '2024', '2023', '2022', 'Cũ hơn'].map((year) => (
                 <label key={year} className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" className="rounded border-border text-primary focus:ring-primary w-4 h-4 accent-primary" />
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 accent-primary" 
+                    checked={selectedYears.includes(year)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedYears(prev => [...prev, year]);
+                      else setSelectedYears(prev => prev.filter(y => y !== year));
+                    }}
+                  />
                   <span className="text-sm text-muted-foreground">{year}</span>
                 </label>
               ))}
@@ -203,7 +223,15 @@ export default function SearchPage() {
             <div className="space-y-3">
               {['IEEE', 'Nature', 'NIPS', 'Science'].map((j) => (
                 <label key={j} className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" className="rounded border-border text-primary focus:ring-primary w-4 h-4 accent-primary" />
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 accent-primary" 
+                    checked={selectedJournals.includes(j)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedJournals(prev => [...prev, j]);
+                      else setSelectedJournals(prev => prev.filter(journal => journal !== j));
+                    }}
+                  />
                   <span className="text-sm text-muted-foreground">{j}</span>
                 </label>
               ))}
@@ -221,10 +249,14 @@ export default function SearchPage() {
                 <>Nhập từ khóa để tìm kiếm</>
               )}
             </h2>
-            <select className="bg-transparent border border-border rounded-lg text-sm p-2 outline-none text-foreground">
-              <option>Độ liên quan</option>
-              <option>Trích dẫn nhiều nhất</option>
-              <option>Mới nhất</option>
+            <select 
+              className="bg-transparent border border-border rounded-lg text-sm p-2 outline-none text-foreground"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+            >
+              <option value="relevance">Độ liên quan</option>
+              <option value="Trích dẫn nhiều nhất">Trích dẫn nhiều nhất</option>
+              <option value="Mới nhất">Mới nhất</option>
             </select>
           </div>
 

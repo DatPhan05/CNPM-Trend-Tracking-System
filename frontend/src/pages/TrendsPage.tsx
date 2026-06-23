@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Award, Clock, Loader2, PieChart as PieChartIcon } from 'lucide-react';
+import { TrendingUp, Award, Clock, Loader2, PieChart as PieChartIcon, FileText, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
 
@@ -9,6 +9,9 @@ export default function TrendsPage() {
   const [overview, setOverview] = useState<any>(null);
   const [trends, setTrends] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  
+  const [exportingCsv, setExportingCsv] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -32,6 +35,35 @@ export default function TrendsPage() {
 
     fetchAnalytics();
   }, []);
+
+  const handleExport = async (type: 'csv' | 'pdf') => {
+    try {
+      if (type === 'csv') setExportingCsv(true);
+      else setExportingPdf(true);
+
+      const response = await api.get(`/analytics/export/${type}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', type === 'csv' ? 'papers_report.csv' : 'analytics_report.pdf');
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`Tải file ${type.toUpperCase()} thành công!`);
+    } catch (error) {
+      console.error(`Export ${type} error:`, error);
+      toast.error(`Lỗi khi xuất file ${type.toUpperCase()}`);
+    } finally {
+      if (type === 'csv') setExportingCsv(false);
+      else setExportingPdf(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -201,9 +233,22 @@ export default function TrendsPage() {
                 Bạn có thể dễ dàng theo dõi mức độ tăng trưởng xuất bản, và phát hiện các xu hướng sớm dựa trên trực quan hóa dữ liệu từ nền tảng Trend Tracking.
               </p>
             </div>
-            <div className="flex flex-col justify-center">
-              <button className="bg-white text-primary px-6 py-3 rounded-xl font-bold w-full hover:bg-white/90 transition-colors shadow-lg">
+            <div className="flex flex-col justify-center gap-4">
+              <button 
+                onClick={() => handleExport('pdf')}
+                disabled={exportingPdf}
+                className="bg-white text-primary px-6 py-3 rounded-xl font-bold w-full hover:bg-white/90 transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {exportingPdf ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />}
                 Tải báo cáo phân tích (PDF)
+              </button>
+              <button 
+                onClick={() => handleExport('csv')}
+                disabled={exportingCsv}
+                className="bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 px-6 py-3 rounded-xl font-bold w-full hover:bg-primary-foreground/20 transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {exportingCsv ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
+                Xuất dữ liệu thô (CSV)
               </button>
             </div>
           </div>

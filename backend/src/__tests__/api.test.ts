@@ -1,8 +1,8 @@
 import request from "supertest";
 import app from "../app";
-import prisma from "../lib/prisma";
+import prisma from "../helpers/prisma";
 
-jest.mock("../lib/prisma");
+jest.mock("../helpers/prisma");
 
 describe("🧪 API Integration & Endpoint Unit Tests", () => {
   let token: string;

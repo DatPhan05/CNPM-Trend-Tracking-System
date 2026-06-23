@@ -1,5 +1,5 @@
 import { Router } from "express";
-import prisma from "../lib/prisma";
+import prisma from "../helpers/prisma";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 

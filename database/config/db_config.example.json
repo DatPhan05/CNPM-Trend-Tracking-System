@@ -1,0 +1,13 @@
+{
+  "database": {
+    "engine": "PostgreSQL",
+    "version": "14.0",
+    "encoding": "UTF8",
+    "timezone": "UTC",
+    "connection_pool": {
+      "min_size": 2,
+      "max_size": 10,
+      "timeout_ms": 5000
+    }
+  }
+}

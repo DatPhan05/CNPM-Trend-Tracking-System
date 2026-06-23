@@ -24,6 +24,8 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
     const keyword = (req.query.keyword as string) || (req.query.query as string) || "";
     const yearParam = req.query.year as string;
     const authorParam = req.query.author as string;
+    const journalParam = req.query.journal as string;
+    const sortParam = req.query.sort as string;
     
     // Pagination parameters
     const page = parseInt(req.query.page as string, 10) || 1;
@@ -49,11 +51,32 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
       ];
     }
 
-    // 2. Year Filter
+    // 2. Year Filter (Comma-separated array, e.g. "2024,2023,older")
     if (yearParam) {
-      const year = parseInt(yearParam, 10);
-      if (!isNaN(year)) {
-        whereClause.publicationYear = year;
+      const yearValues = yearParam.split(',').map(y => y.trim());
+      const specificYears = yearValues.map(y => parseInt(y, 10)).filter(y => !isNaN(y));
+      const hasOlder = yearValues.includes('older');
+
+      if (specificYears.length > 0 && hasOlder) {
+        whereClause.OR = [
+          ...(whereClause.OR || []),
+          { publicationYear: { in: specificYears } },
+          { publicationYear: { lte: 2020 } }
+        ];
+      } else if (specificYears.length > 0) {
+        whereClause.publicationYear = { in: specificYears };
+      } else if (hasOlder) {
+        whereClause.publicationYear = { lte: 2020 };
+      }
+    }
+
+    // 2.1 Journal Filter
+    if (journalParam) {
+      const journals = journalParam.split(',').map(j => j.trim());
+      if (journals.length > 0) {
+        whereClause.journal = {
+          name: { in: journals }
+        };
       }
     }
 
@@ -86,9 +109,12 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
             },
           },
         },
-        orderBy: {
-          citationCount: "desc",
-        },
+        // 5. Sorting
+        orderBy: (() => {
+          if (sortParam === "newest") return { publicationYear: "desc" };
+          // For relevance, we fallback to citations since full-text relevance is complex
+          return { citationCount: "desc" };
+        })(),
         skip,
         take: limit,
       })

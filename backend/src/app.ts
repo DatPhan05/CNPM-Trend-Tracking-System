@@ -10,8 +10,9 @@ import settingRoutes from "./routes/setting.routes";
 import crawlerRoutes from "./routes/crawler.routes";
 import paperRoutes from "./routes/paper.routes";
 import bookmarkRoutes from "./routes/bookmark.routes";
+import analyticsRoutes from "./routes/analytics.routes";
 import { getTrends } from "./controllers/paper.controller";
-import prisma from "./lib/prisma";
+import prisma from "./helpers/prisma";
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use("/api/settings", settingRoutes);
 app.use("/api/crawler", crawlerRoutes);
 app.use("/api/papers", paperRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.get("/api/trends", getTrends);
 
 // ── Global Error Handler ──────────────────────────────────────────────────────

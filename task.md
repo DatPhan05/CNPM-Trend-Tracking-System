@@ -25,10 +25,10 @@ Dưới đây là tiến độ cập nhật các Task từ file Jira của dự 
 ---
 
 ## 🎨 Giai đoạn 3: Phát triển Frontend & Tích hợp User (PLAN 3)
-*Trạng thái:* **IN PROGRESS**
-- [/] **CNPM-15** | Task 3.1: Thiết lập Layout chính (Navbar, Sidebar, Footer, Routing)
-- [/] **CNPM-16** | Task 3.2: Xây dựng và tích hợp trang Authentication (Login, Đăng ký, Quên mật khẩu)
-- [/] **CNPM-17** | Task 3.3: Xây dựng giao diện Admin Dashboard và tích hợp API Quản lý User
+*Trạng thái:* **DONE** ✅
+- [x] **CNPM-15** | Task 3.1: Thiết lập Layout chính (Navbar, Sidebar, Footer, Routing) *(Đã hoàn thành)* 🎉
+- [x] **CNPM-16** | Task 3.2: Xây dựng và tích hợp trang Authentication (Login, Đăng ký, Quên mật khẩu) *(Đã hoàn thành)* 🎉
+- [x] **CNPM-17** | Task 3.3: Xây dựng giao diện Admin Dashboard và tích hợp API Quản lý User *(Đã hoàn thành)* 🎉
 - [x] **CNPM-18** | Task 3.4: Xây dựng trang Profile cá nhân cho User *(Đã hoàn thành & kiểm thử thành công)* 🎉
 - [x] **CNPM-19** | Task 3.5: Thiết lập Global State Management để quản lý phiên đăng nhập và thông báo *(Đã hoàn thành)* 🎉
 
@@ -36,10 +36,10 @@ Dưới đây là tiến độ cập nhật các Task từ file Jira của dự 
 
 ## 📈 Giai đoạn 4: Xử lý dữ liệu & Phân tích Xu hướng (PLAN 4)
 *Trạng thái:* **TO DO**
-- [ ] **CNPM-21** | Task 4.1: (BE) Xây dựng logic phân tích dữ liệu, tính toán thống kê
-- [ ] **CNPM-22** | Task 4.2: (BE) Xây dựng API trả về dữ liệu phục vụ biểu đồ
-- [ ] **CNPM-23** | Task 4.3: (FE) Tích hợp thư viện biểu đồ (Recharts, Chart.js) và xây dựng UI
-- [ ] **CNPM-24** | Task 4.4: (FE) Tích hợp API và hoàn thiện giao diện Dashboard
+- [x] **CNPM-21** | Task 4.1: (BE) Xây dựng logic phân tích dữ liệu, tính toán thống kê
+- [x] **CNPM-22** | Task 4.2: (BE) Xây dựng API trả về dữ liệu phục vụ biểu đồ
+- [x] **CNPM-23** | Task 4.3: (FE) Tích hợp thư viện biểu đồ (Recharts, Chart.js) và xây dựng UI
+- [x] **CNPM-24** | Task 4.4: (FE) Tích hợp API và hoàn thiện giao diện Dashboard
 - [ ] **CNPM-25** | Task 4.5: (FE/BE) Hoàn thiện tính năng Lọc (Filter) và Tìm kiếm nâng cao
 
 ---

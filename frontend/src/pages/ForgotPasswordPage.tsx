@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen, Mail, ArrowLeft, Send } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import api from '@/services/api';
+import api from '@/api/api';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

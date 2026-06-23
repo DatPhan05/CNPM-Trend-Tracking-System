@@ -1,6 +1,6 @@
 import axios from "axios";
 import { parseStringPromise } from "xml2js";
-import prisma from "../lib/prisma";
+import prisma from "../helpers/prisma";
 
 // public open arXiv API query URL (fetching 15 papers on AI and Software Engineering)
 const ARXIV_API_URL = "http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.SE&max_results=15&sortBy=submittedDate&sortOrder=descending";

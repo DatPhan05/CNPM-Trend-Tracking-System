@@ -65,12 +65,24 @@ async function main() {
     },
   });
 
+  const journalScience = await prisma.journal.create({
+    data: { name: "Science", publisher: "AAAS" },
+  });
+
+  const journalNIPS = await prisma.journal.create({
+    data: { name: "NIPS", publisher: "NeurIPS Foundation" },
+  });
+
   console.log("📖 Đã tạo tạp chí mẫu.");
 
   // 4. Tạo Tác giả (Authors)
   const author1 = await prisma.author.create({ data: { name: "Andrew Ng" } });
   const author2 = await prisma.author.create({ data: { name: "Geoffrey Hinton" } });
   const author3 = await prisma.author.create({ data: { name: "Martin Fowler" } });
+  const author4 = await prisma.author.create({ data: { name: "Ilya Sutskever" } });
+  const author5 = await prisma.author.create({ data: { name: "Yann LeCun" } });
+  const author6 = await prisma.author.create({ data: { name: "Yoshua Bengio" } });
+  const author7 = await prisma.author.create({ data: { name: "Demis Hassabis" } });
 
   console.log("✍️ Đã tạo tác giả mẫu.");
 
@@ -79,6 +91,9 @@ async function main() {
   const kwML = await prisma.keyword.create({ data: { name: "Machine Learning" } });
   const kwSE = await prisma.keyword.create({ data: { name: "Software Engineering" } });
   const kwArchitecture = await prisma.keyword.create({ data: { name: "Microservices" } });
+  const kwLLM = await prisma.keyword.create({ data: { name: "Large Language Models" } });
+  const kwNLP = await prisma.keyword.create({ data: { name: "Natural Language Processing" } });
+  const kwVision = await prisma.keyword.create({ data: { name: "Computer Vision" } });
 
   console.log("🏷️ Đã tạo từ khóa mẫu.");
 
@@ -109,6 +124,138 @@ async function main() {
     },
   });
 
+  const paper3 = await prisma.paper.create({
+    data: {
+      title: "Quantum Computing Advances in 2024",
+      abstract: "A comprehensive overview of quantum computing milestones achieved in early 2024, including error correction rates and qubit scalability.",
+      doi: "10.1126/science.2024.0003",
+      publicationYear: 2024,
+      citationCount: 315,
+      sourceProvider: "Science",
+      journalId: journalScience.id,
+    },
+  });
+
+  const paper4 = await prisma.paper.create({
+    data: {
+      title: "Transformers in Vision Tasks",
+      abstract: "Exploring how transformer architectures are replacing CNNs in standard computer vision tasks like classification and segmentation.",
+      doi: "10.5555/nips.2023.0004",
+      publicationYear: 2023,
+      citationCount: 890,
+      sourceProvider: "NIPS",
+      journalId: journalNIPS.id,
+    },
+  });
+
+  const paper5 = await prisma.paper.create({
+    data: {
+      title: "Climate Change and Machine Learning",
+      abstract: "Using machine learning to predict climate change impacts and optimize renewable energy distribution grids.",
+      doi: "10.1038/s41586-022-0005",
+      publicationYear: 2022,
+      citationCount: 540,
+      sourceProvider: "Nature",
+      journalId: journalNature.id,
+    },
+  });
+
+  const paper6 = await prisma.paper.create({
+    data: {
+      title: "Legacy Systems to Cloud Migration",
+      abstract: "Evaluating the cost-benefit analysis of moving monolithic legacy healthcare systems to public cloud infrastructure.",
+      doi: "10.1109/TSE.2024.0006",
+      publicationYear: 2024,
+      citationCount: 72,
+      sourceProvider: "IEEE",
+      journalId: journalIEEE.id,
+    },
+  });
+
+  const paper7 = await prisma.paper.create({
+    data: {
+      title: "Llama 2: Open Foundation and Fine-Tuned Chat Models",
+      abstract: "In this work, we develop and release Llama 2, a collection of pretrained and fine-tuned large language models (LLMs) ranging in scale from 7 billion to 70 billion parameters.",
+      doi: "10.1038/llama2.2023",
+      publicationYear: 2023,
+      citationCount: 4500,
+      sourceProvider: "Nature",
+      journalId: journalNature.id,
+    },
+  });
+
+  const paper8 = await prisma.paper.create({
+    data: {
+      title: "Gemini: A Family of Highly Capable Multimodal Models",
+      abstract: "We introduce Gemini, a family of highly capable multimodal models, trained jointly across image, audio, video, and text data.",
+      doi: "10.1126/science.gemini.2024",
+      publicationYear: 2024,
+      citationCount: 3200,
+      sourceProvider: "Science",
+      journalId: journalScience.id,
+    },
+  });
+
+  const paper9 = await prisma.paper.create({
+    data: {
+      title: "Sparks of Artificial General Intelligence: Early experiments with GPT-4",
+      abstract: "We demonstrate that, beyond its mastery of language, GPT-4 can solve novel and difficult tasks that span mathematics, coding, vision, medicine, law, psychology and more.",
+      doi: "10.5555/nips.agi.2023",
+      publicationYear: 2023,
+      citationCount: 1800,
+      sourceProvider: "NIPS",
+      journalId: journalNIPS.id,
+    },
+  });
+
+  const paper10 = await prisma.paper.create({
+    data: {
+      title: "Mamba: Linear-Time Sequence Modeling with Selective State Spaces",
+      abstract: "We propose Mamba, a new state space model architecture showing promising performance on language modeling with linear time complexity.",
+      doi: "10.1109/TSE.mamba.2024",
+      publicationYear: 2024,
+      citationCount: 950,
+      sourceProvider: "IEEE",
+      journalId: journalIEEE.id,
+    },
+  });
+
+  const paper11 = await prisma.paper.create({
+    data: {
+      title: "QLoRA: Efficient Finetuning of Quantized LLMs",
+      abstract: "We present QLoRA, an efficient finetuning approach that reduces memory usage enough to finetune a 65B parameter model on a single 48GB GPU.",
+      doi: "10.5555/nips.qlora.2023",
+      publicationYear: 2023,
+      citationCount: 2100,
+      sourceProvider: "NIPS",
+      journalId: journalNIPS.id,
+    },
+  });
+
+  const paper12 = await prisma.paper.create({
+    data: {
+      title: "Vision Transformers for Remote Sensing Image Classification",
+      abstract: "A comprehensive review of the application of Vision Transformers (ViT) in remote sensing, highlighting their advantages over traditional CNNs.",
+      doi: "10.1109/TSE.vit.2022",
+      publicationYear: 2022,
+      citationCount: 420,
+      sourceProvider: "IEEE",
+      journalId: journalIEEE.id,
+    },
+  });
+
+  const paper13 = await prisma.paper.create({
+    data: {
+      title: "Ethical Considerations in Large Language Models",
+      abstract: "An analysis of the ethical implications, biases, and safety concerns associated with deploying massive AI models in real-world applications.",
+      doi: "10.1126/science.ethics.2021",
+      publicationYear: 2021,
+      citationCount: 890,
+      sourceProvider: "Science",
+      journalId: journalScience.id,
+    },
+  });
+
   console.log("📄 Đã tạo các bài báo mẫu.");
 
   // 7. Tạo quan hệ Bài báo - Tác giả (PaperAuthor)
@@ -117,6 +264,17 @@ async function main() {
       { paperId: paper1.id, authorId: author1.id },
       { paperId: paper1.id, authorId: author2.id },
       { paperId: paper2.id, authorId: author3.id },
+      { paperId: paper3.id, authorId: author1.id },
+      { paperId: paper4.id, authorId: author2.id },
+      { paperId: paper5.id, authorId: author1.id },
+      { paperId: paper6.id, authorId: author3.id },
+      { paperId: paper7.id, authorId: author5.id },
+      { paperId: paper8.id, authorId: author7.id },
+      { paperId: paper9.id, authorId: author4.id },
+      { paperId: paper10.id, authorId: author6.id },
+      { paperId: paper11.id, authorId: author6.id },
+      { paperId: paper12.id, authorId: author5.id },
+      { paperId: paper13.id, authorId: author4.id },
     ],
   });
 
@@ -127,6 +285,23 @@ async function main() {
       { paperId: paper1.id, keywordId: kwML.id },
       { paperId: paper2.id, keywordId: kwSE.id },
       { paperId: paper2.id, keywordId: kwArchitecture.id },
+      { paperId: paper3.id, keywordId: kwAI.id },
+      { paperId: paper4.id, keywordId: kwML.id },
+      { paperId: paper5.id, keywordId: kwML.id },
+      { paperId: paper6.id, keywordId: kwSE.id },
+      { paperId: paper6.id, keywordId: kwArchitecture.id },
+      { paperId: paper7.id, keywordId: kwLLM.id },
+      { paperId: paper7.id, keywordId: kwAI.id },
+      { paperId: paper8.id, keywordId: kwLLM.id },
+      { paperId: paper8.id, keywordId: kwVision.id },
+      { paperId: paper9.id, keywordId: kwAI.id },
+      { paperId: paper9.id, keywordId: kwLLM.id },
+      { paperId: paper10.id, keywordId: kwNLP.id },
+      { paperId: paper10.id, keywordId: kwLLM.id },
+      { paperId: paper11.id, keywordId: kwLLM.id },
+      { paperId: paper11.id, keywordId: kwML.id },
+      { paperId: paper12.id, keywordId: kwVision.id },
+      { paperId: paper13.id, keywordId: kwAI.id },
     ],
   });
 

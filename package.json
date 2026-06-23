@@ -8,7 +8,7 @@
     "build": "tsc",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
-    "db:seed": "npx tsx backend/prisma/seed.ts",
+    "db:seed": "npx tsx database/seeds/seed_data.ts",
     "scrape": "tsx backend/src/services/scraper.ts",
     "test": "jest --runInBand",
     "frontend:dev": "npm run dev --prefix frontend",
@@ -66,7 +66,8 @@
     "typescript": "^6.0.3"
   },
   "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
+    "seed": "npx tsx database/seeds/seed_data.ts",
+    "schema": "backend/prisma/schema.prisma"
   },
   "workspaces": [
     "frontend"

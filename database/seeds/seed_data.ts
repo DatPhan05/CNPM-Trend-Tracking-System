@@ -1,5 +1,5 @@
 import { UserRole } from "@prisma/client";
-import prisma from "../src/helpers/prisma";
+import prisma from "../../backend/src/helpers/prisma";
 import bcrypt from "bcrypt";
 
 async function main() {

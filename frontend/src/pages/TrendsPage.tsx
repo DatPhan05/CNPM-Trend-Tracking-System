@@ -172,7 +172,7 @@ export default function TrendsPage() {
                   paddingAngle={5}
                   dataKey="value"
                   nameKey="name"
-                  label={({ name, percent }) => `${name.length > 10 ? name.substring(0,10)+'...' : name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name = '', percent = 0 }) => `${name.length > 10 ? name.substring(0,10)+'...' : name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {categories.map((entry, index) => {
                     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];

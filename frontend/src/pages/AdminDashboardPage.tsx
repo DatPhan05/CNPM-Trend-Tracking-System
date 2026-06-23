@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trash2, ShieldAlert, Loader2 } from 'lucide-react';
+import { Users, Trash2, ShieldAlert, Loader2, FileText, BookOpen, PenTool } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
 
@@ -9,6 +9,7 @@ export default function AdminDashboardPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, admins: 0 });
+  const [analytics, setAnalytics] = useState({ papers: 0, journals: 0, authors: 0 });
 
   useEffect(() => {
     // Basic route guard
@@ -19,20 +20,32 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    fetchUsers();
+    fetchData();
   }, [navigate]);
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
-      // RESTful: users is a top-level resource, not a sub-resource of auth
-      const { data } = await api.get('/users');
-      setUsers(data.users);
+      // Fetch users and analytics in parallel
+      const [usersRes, analyticsRes] = await Promise.all([
+        api.get('/users'),
+        api.get('/analytics/overview')
+      ]);
+
+      setUsers(usersRes.data.users);
       setStats({
-        total: data.count,
-        admins: data.users.filter((u: any) => u.role === 'admin').length
+        total: usersRes.data.count,
+        admins: usersRes.data.users.filter((u: any) => u.role === 'ADMIN').length
       });
+
+      if (analyticsRes.data.success) {
+        setAnalytics({
+          papers: analyticsRes.data.data.totalPapers,
+          journals: analyticsRes.data.data.totalJournals,
+          authors: analyticsRes.data.data.totalAuthors,
+        });
+      }
     } catch (error) {
-      toast.error('Lỗi khi tải danh sách người dùng');
+      toast.error('Lỗi khi tải dữ liệu trang quản trị');
     } finally {
       setIsLoading(false);
     }
@@ -51,34 +64,35 @@ export default function AdminDashboardPage() {
     try {
       await api.delete(`/users/${id}`);
       toast.success('Đã xóa tài khoản thành công');
-      fetchUsers(); // Refresh list
+      fetchData(); // Refresh list
     } catch (error) {
       toast.error('Lỗi khi xóa tài khoản');
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-24 md:py-32 max-w-5xl">
+    <div className="container mx-auto px-4 py-24 md:py-32 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-3">
           <ShieldAlert className="w-8 h-8 text-amber-500" />
           Bảng điều khiển Quản trị
         </h1>
         <p className="text-muted-foreground mt-2">
-          Quản lý người dùng và theo dõi tình trạng hệ thống.
+          Quản lý người dùng và theo dõi tình trạng hệ thống toàn diện.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div className="glass p-6 rounded-2xl flex items-center gap-4">
           <div className="p-4 bg-primary/10 rounded-xl">
             <Users className="w-8 h-8 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Tổng số người dùng</p>
+            <p className="text-sm font-medium text-muted-foreground">Tổng người dùng</p>
             <p className="text-3xl font-bold text-foreground">{stats.total}</p>
           </div>
         </div>
+        
         <div className="glass p-6 rounded-2xl flex items-center gap-4">
           <div className="p-4 bg-amber-500/10 rounded-xl">
             <ShieldAlert className="w-8 h-8 text-amber-500" />
@@ -86,6 +100,36 @@ export default function AdminDashboardPage() {
           <div>
             <p className="text-sm font-medium text-muted-foreground">Số lượng Admin</p>
             <p className="text-3xl font-bold text-foreground">{stats.admins}</p>
+          </div>
+        </div>
+
+        <div className="glass p-6 rounded-2xl flex items-center gap-4">
+          <div className="p-4 bg-emerald-500/10 rounded-xl">
+            <FileText className="w-8 h-8 text-emerald-500" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Tổng bài báo</p>
+            <p className="text-3xl font-bold text-foreground">{analytics.papers}</p>
+          </div>
+        </div>
+
+        <div className="glass p-6 rounded-2xl flex items-center gap-4">
+          <div className="p-4 bg-blue-500/10 rounded-xl">
+            <BookOpen className="w-8 h-8 text-blue-500" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Tổng tạp chí</p>
+            <p className="text-3xl font-bold text-foreground">{analytics.journals}</p>
+          </div>
+        </div>
+
+        <div className="glass p-6 rounded-2xl flex items-center gap-4">
+          <div className="p-4 bg-purple-500/10 rounded-xl">
+            <PenTool className="w-8 h-8 text-purple-500" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Tổng tác giả</p>
+            <p className="text-3xl font-bold text-foreground">{analytics.authors}</p>
           </div>
         </div>
       </div>

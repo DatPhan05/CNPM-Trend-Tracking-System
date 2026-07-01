@@ -33,7 +33,7 @@ export const fetchOpenAlexWorks = async (keyword: string, perPage = 10) => {
       per_page: perPage,
     },
     headers: {
-      "User-Agent": "TrendScholar/1.0.0 (mailto:admin@example.com)",
+      "User-Agent": "Trend-Tracking/1.0.0 (mailto:admin@example.com)",
     },
   });
 

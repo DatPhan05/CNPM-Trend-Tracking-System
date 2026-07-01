@@ -47,9 +47,9 @@ rounded:
   full: "9999px"
 ---
 
-# TrendScholar Design Guidelines
+# Trend-Tracking Design Guidelines
 
-This document outlines the core layout structures, design tokens, and components governing the user interfaces of the TrendScholar platform.
+This document outlines the core layout structures, design tokens, and components governing the user interfaces of the Trend-Tracking platform.
 
 ## Design Philosophy
 The system is built on four core visual pillars:

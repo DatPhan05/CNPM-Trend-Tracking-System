@@ -78,7 +78,7 @@ router.get("/:key", authenticateToken, authorizeRoles("ADMIN"), getSettingByKey)
  *                 example: APP_NAME
  *               value:
  *                 type: string
- *                 example: TrendScholar
+ *                 example: Trend-Tracking
  *               description:
  *                 type: string
  *                 example: Application display name
@@ -116,7 +116,7 @@ router.post("/", authenticateToken, authorizeRoles("ADMIN"), createSetting);
  *             properties:
  *               value:
  *                 type: string
- *                 example: TrendScholar System
+ *                 example: Trend-Tracking System
  *               description:
  *                 type: string
  *                 example: Updated application name

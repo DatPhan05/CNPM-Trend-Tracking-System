@@ -24,32 +24,31 @@ const router = Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - fullName
- *               - email
- *               - password
- *             properties:
- *               fullName:
- *                 type: string
- *                 example: Admin User
- *               email:
- *                 type: string
- *                 example: admin@example.com
- *               password:
- *                 type: string
- *                 example: "123456"
- *               role:
- *                 type: string
- *                 enum: [ADMIN, STUDENT, RESEARCHER]
- *                 example: ADMIN
+ *             $ref: '#/components/schemas/RegisterRequest'
  *     responses:
  *       201:
  *         description: Register successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Register successfully
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       400:
- *         description: Missing required fields
+ *         $ref: '#/components/responses/ValidationError'
  *       409:
  *         description: Email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/register", validateBody(registerSchema), register);
 
@@ -64,24 +63,22 @@ router.post("/register", validateBody(registerSchema), register);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 example: admin@example.com
- *               password:
- *                 type: string
- *                 example: "123456"
+ *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
  *         description: Login successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Missing email or password
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
  *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/login", validateBody(loginSchema), login);
 
@@ -96,10 +93,17 @@ router.post("/login", validateBody(loginSchema), login);
  *     responses:
  *       200:
  *         description: Current user information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       401:
- *         description: Access token is required
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
- *         description: Invalid or expired token
+ *         $ref: '#/components/responses/ForbiddenError'
  */
 router.get("/me", authenticateToken, getMe);
 
@@ -123,10 +127,22 @@ router.get("/me", authenticateToken, getMe);
  *     responses:
  *       200:
  *         description: New access_token and refresh_token returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 access_token:
+ *                   type: string
+ *                 refresh_token:
+ *                   type: string
  *       400:
- *         description: refresh_token is required
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         description: Invalid or tampered token
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.post("/refresh", validateBody(refreshTokenSchema), refreshToken);
 
@@ -154,10 +170,23 @@ router.post("/refresh", validateBody(refreshTokenSchema), refreshToken);
  *     responses:
  *       200:
  *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Update profile successfully
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       400:
- *         description: Invalid body or missing fields
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       409:
  *         description: Email already in use
  */
@@ -190,10 +219,14 @@ router.put("/profile", authenticateToken, validateBody(updateProfileSchema), upd
  *     responses:
  *       200:
  *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MessageResponse'
  *       400:
- *         description: Invalid body or missing fields
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         description: Invalid current password or unauthorized
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.put("/change-password", authenticateToken, validateBody(changePasswordSchema), changePassword);
 
@@ -218,6 +251,12 @@ router.put("/change-password", authenticateToken, validateBody(changePasswordSch
  *     responses:
  *       200:
  *         description: If email exists, reset link sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MessageResponse'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
  */
 router.post("/forgot-password", validateBody(forgotPasswordSchema), forgotPassword);
 

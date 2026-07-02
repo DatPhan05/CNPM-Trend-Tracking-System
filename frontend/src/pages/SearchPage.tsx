@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, BookOpen, Star, ExternalLink, Calendar, Users, Database, BookmarkPlus, BookmarkCheck } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, BookOpen, Star, ExternalLink, Calendar, Users, Database, BookmarkPlus, BookmarkCheck, Download, Loader2 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import api from '@/api/api';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '@/utils/error';
 
 interface Paper {
   id: string | number;
@@ -29,6 +30,7 @@ export default function SearchPage() {
   // Track which paper IDs are bookmarked by current user
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
+  const [exportingCsv, setExportingCsv] = useState(false);
 
   const isLoggedIn = !!localStorage.getItem('access_token');
 
@@ -63,6 +65,29 @@ export default function SearchPage() {
     }
   };
 
+  const handleExportSearch = async () => {
+    try {
+      setExportingCsv(true);
+      const response = await api.get(`/analytics/export/csv`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'search_results.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('Xuất dữ liệu tìm kiếm thành công!');
+    } catch (error) {
+      console.error('Export CSV error:', error);
+      toast.error('Lỗi khi xuất dữ liệu.');
+    } finally {
+      setExportingCsv(false);
+    }
+  };
+
   // Load current user's bookmarks to sync bookmark button state
   const fetchBookmarks = async () => {
     if (!isLoggedIn) return;
@@ -77,10 +102,11 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (mode === 'mock' || hasSearched) {
-      setCurrentPage(1);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPapers(query, 1);
     }
     fetchBookmarks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, selectedYears, selectedJournals, sortOption]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -100,7 +126,6 @@ export default function SearchPage() {
 
     try {
       if (bookmarkedIds.has(paperId)) {
-        // RESTful DELETE /api/bookmarks/:paperId
         await api.delete(`/bookmarks/${paperId}`);
         setBookmarkedIds(prev => {
           const next = new Set(prev);
@@ -109,13 +134,13 @@ export default function SearchPage() {
         });
         toast.success('Đã xóa bookmark');
       } else {
-        // POST /api/bookmarks with paperId in body
         await api.post('/bookmarks', { paperId });
         setBookmarkedIds(prev => new Set(prev).add(paperId));
         toast.success('Đã lưu bookmark ⭐');
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Không thể cập nhật bookmark');
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err, 'Không thể cập nhật bookmark'));
     } finally {
       setBookmarkLoading(null);
     }
@@ -242,13 +267,25 @@ export default function SearchPage() {
         {/* Results List */}
         <div className="lg:col-span-3 space-y-5">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-medium text-foreground">
-              {hasSearched ? (
-                <>Tìm thấy <span className="text-primary font-bold">{papers.length}</span> kết quả</>
-              ) : (
-                <>Nhập từ khóa để tìm kiếm</>
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-medium text-foreground">
+                {hasSearched ? (
+                  <>Tìm thấy <span className="text-primary font-bold">{papers.length}</span> kết quả</>
+                ) : (
+                  <>Nhập từ khóa để tìm kiếm</>
+                )}
+              </h2>
+              {hasSearched && papers.length > 0 && (
+                <button 
+                  onClick={handleExportSearch}
+                  disabled={exportingCsv || isSearching}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-500/20 transition-colors text-sm font-medium border border-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {exportingCsv ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  <span className="hidden sm:inline">Xuất CSV</span>
+                </button>
               )}
-            </h2>
+            </div>
             <select 
               className="bg-transparent border border-border rounded-lg text-sm p-2 outline-none text-foreground"
               value={sortOption}

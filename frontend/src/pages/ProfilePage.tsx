@@ -15,6 +15,7 @@ import {
 import api from '@/api/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { getErrorMessage } from '@/utils/error';
 
 interface UserProfile {
   id: string;
@@ -86,8 +87,9 @@ export default function ProfilePage() {
       updateUser({ fullName: updatedUser.fullName, email: updatedUser.email });
       
       toast.success('Cập nhật thông tin cá nhân thành công!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Không thể cập nhật thông tin');
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err, 'Không thể cập nhật thông tin'));
     } finally {
       setSavingProfile(false);
     }
@@ -118,8 +120,9 @@ export default function ProfilePage() {
       setConfirmPassword('');
       
       toast.success('Thay đổi mật khẩu thành công!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Không thể đổi mật khẩu');
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err, 'Không thể đổi mật khẩu'));
     } finally {
       setSavingPassword(false);
     }

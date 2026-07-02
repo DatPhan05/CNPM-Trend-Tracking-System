@@ -38,10 +38,16 @@ const router = Router();
  *           type: string
  *         description: Filter by author name (local mode)
  *       - in: query
- *         name: keyword
+ *         name: journal
  *         schema:
  *           type: string
- *         description: Keyword for OpenAlex search (openalex mode)
+ *         description: Filter by journal name, comma separated
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [relevance, newest, citations]
+ *         description: Sort order for the result list
  *       - in: query
  *         name: mode
  *         schema:
@@ -64,6 +70,18 @@ const router = Router();
  *     responses:
  *       200:
  *         description: List of papers matching the query with pagination metadata
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaperListResponse'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/", (req, res) => {
   // RESTful: single GET /papers endpoint handles both listing and searching
@@ -86,6 +104,58 @@ router.get("/", (req, res) => {
  *     responses:
  *       200:
  *         description: Aggregated chart-ready statistics for trends, citations, keywords, and authors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     totalPapers:
+ *                       type: integer
+ *                       example: 128
+ *                     totalJournals:
+ *                       type: integer
+ *                       example: 12
+ *                     totalKeywords:
+ *                       type: integer
+ *                       example: 32
+ *                     totalCitations:
+ *                       type: integer
+ *                       example: 5200
+ *                     trendSeries:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/TrendPoint'
+ *                     citationSeries:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           year:
+ *                             type: string
+ *                             example: "2026"
+ *                           citations:
+ *                             type: integer
+ *                             example: 480
+ *                     keywordSeries:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/TopAuthorPoint'
+ *                     topAuthors:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/TopAuthorPoint'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/trends", getTrends);
 
@@ -105,29 +175,18 @@ router.get("/trends", getTrends);
  *     responses:
  *       200:
  *         description: Paper found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaperDetailResponse'
  *       404:
- *         description: Paper not found
- */
-router.get("/:id", getPaperById);
-
-/**
- * @swagger
- * /api/papers/{id}:
- *   get:
- *     summary: Get a scientific paper by ID
- *     tags: [Papers]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: UUID of the paper
- *     responses:
- *       200:
- *         description: Paper found
- *       404:
- *         description: Paper not found
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id", getPaperById);
 

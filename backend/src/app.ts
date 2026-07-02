@@ -2,6 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
+import { apiLimiter } from "./middlewares/rateLimit.middleware";
+import { securityHeaders } from "./middlewares/security.middleware";
+import { cacheMiddleware } from "./middlewares/cache.middleware";
 
 import authRoutes from "./routes/auth.routes";
 import adminRoutes from "./routes/admin.routes";
@@ -21,6 +24,16 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+
+// Security middleware
+app.use(securityHeaders);
+
+// Rate limiting for API routes
+app.use('/api/', apiLimiter);
+
+// Cache middleware for specific endpoints
+app.use('/api/papers', cacheMiddleware(300)); // Cache paper listings for 5 minutes
+app.use('/api/trends', cacheMiddleware(60));  // Cache trends for 1 minute
 
 // ── RESTful Constraint #3: Cacheability ──────────────────────────────────────
 app.use((req, res, next) => {

@@ -21,10 +21,17 @@ interface AuthState {
   isLoading: boolean;
 }
 
+interface UserData {
+  id: number;
+  email: string;
+  role: string;
+  fullName: string;
+}
+
 interface AuthContextType extends AuthState {
-  login: (accessToken: string, refreshToken: string, userData: any) => void;
+  login: (accessToken: string, refreshToken: string, userData: UserData) => void;
   logout: () => void;
-  updateUser: (userData: any) => void;
+  updateUser: (userData: Partial<UserData> & { fullName: string }) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,7 +77,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_name');
+    localStorage.removeItem('user_role');
+
+    setState({
+      isAuthenticated: false,
+      user: null,
+      isLoading: false,
+    });
+  };
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     checkAuth();
 
     // Listen to unauthorized event from axios interceptor
@@ -82,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
-  const login = (accessToken: string, refreshToken: string, userData: any) => {
+  const login = (accessToken: string, refreshToken: string, userData: UserData) => {
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('user_name', userData.fullName);
@@ -100,20 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_role');
-
-    setState({
-      isAuthenticated: false,
-      user: null,
-      isLoading: false,
-    });
-  };
-
-  const updateUser = (userData: any) => {
+  const updateUser = (userData: Partial<UserData> & { fullName: string }) => {
     if (state.user) {
       localStorage.setItem('user_name', userData.fullName);
       // userRole and tokens remain unchanged
@@ -135,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

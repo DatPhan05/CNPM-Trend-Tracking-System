@@ -1,14 +1,36 @@
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Award, Clock, Loader2, PieChart as PieChartIcon } from 'lucide-react';
+import { TrendingUp, Award, Clock, Loader2, PieChart as PieChartIcon, FileText, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
 
+interface OverviewStats {
+  totalPapers: number;
+  newPapersThisMonth: number;
+  totalJournals: number;
+  totalAuthors: number;
+}
+
+interface TrendData {
+  year: number;
+  papers: number;
+  citations: number;
+}
+
+interface CategoryData {
+  name: string;
+  value: number;
+}
+
 export default function TrendsPage() {
   const [loading, setLoading] = useState(true);
-  const [overview, setOverview] = useState<any>(null);
-  const [trends, setTrends] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [overview, setOverview] = useState<OverviewStats | null>(null);
+  const [trends, setTrends] = useState<TrendData[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  
+  const [exportingCsv, setExportingCsv] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -32,6 +54,35 @@ export default function TrendsPage() {
 
     fetchAnalytics();
   }, []);
+
+  const handleExport = async (type: 'csv' | 'pdf') => {
+    try {
+      if (type === 'csv') setExportingCsv(true);
+      else setExportingPdf(true);
+
+      const response = await api.get(`/analytics/export/${type}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', type === 'csv' ? 'papers_report.csv' : 'analytics_report.pdf');
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`Tải file ${type.toUpperCase()} thành công!`);
+    } catch (error) {
+      console.error(`Export ${type} error:`, error);
+      toast.error(`Lỗi khi xuất file ${type.toUpperCase()}`);
+    } finally {
+      if (type === 'csv') setExportingCsv(false);
+      else setExportingPdf(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -201,14 +252,74 @@ export default function TrendsPage() {
                 Bạn có thể dễ dàng theo dõi mức độ tăng trưởng xuất bản, và phát hiện các xu hướng sớm dựa trên trực quan hóa dữ liệu từ nền tảng Trend Tracking.
               </p>
             </div>
-            <div className="flex flex-col justify-center">
-              <button className="bg-white text-primary px-6 py-3 rounded-xl font-bold w-full hover:bg-white/90 transition-colors shadow-lg">
-                Tải báo cáo phân tích (PDF)
+            <div className="flex flex-col justify-center gap-4">
+              <button 
+                onClick={() => setShowExportModal(true)}
+                className="bg-white text-primary px-6 py-3 rounded-xl font-bold w-full hover:bg-white/90 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] flex items-center justify-center gap-2 transform hover:-translate-y-1"
+              >
+                <Download className="h-5 w-5" />
+                Tùy chọn Xuất Báo cáo
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-display font-bold text-foreground">Xuất Báo Cáo</h2>
+                <p className="text-sm text-muted-foreground mt-1">Chọn định dạng dữ liệu bạn muốn tải xuống</p>
+              </div>
+              <button onClick={() => setShowExportModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors text-muted-foreground hover:text-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            
+            <div className="p-6 grid grid-cols-1 gap-4">
+              <button 
+                onClick={() => handleExport('pdf')}
+                disabled={exportingPdf || exportingCsv}
+                className="flex items-start text-left p-4 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all group relative disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="p-3 bg-red-500/10 text-red-500 rounded-lg mr-4 group-hover:scale-110 transition-transform">
+                  {exportingPdf ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileText className="h-6 w-6" />}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">Báo cáo Tổng hợp (PDF)</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Tài liệu phân tích trực quan bao gồm các biểu đồ và danh sách top 20 bài báo nổi bật nhất.</p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => handleExport('csv')}
+                disabled={exportingPdf || exportingCsv}
+                className="flex items-start text-left p-4 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all group relative disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="p-3 bg-green-500/10 text-green-500 rounded-lg mr-4 group-hover:scale-110 transition-transform">
+                  {exportingCsv ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">Dữ liệu Thô (CSV)</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Bảng dữ liệu đầy đủ dùng để phân tích chuyên sâu trên Excel hoặc các công cụ Data Science.</p>
+                </div>
+              </button>
+            </div>
+            
+            <div className="p-4 bg-secondary/50 border-t border-border flex justify-end">
+              <button 
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Hủy bỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

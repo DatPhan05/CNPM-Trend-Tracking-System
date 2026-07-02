@@ -3,6 +3,7 @@ import { BookOpen, User, Mail, Lock, Building, ArrowRight, Eye, EyeOff } from 'l
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/api/api';
+import { getErrorMessage } from '@/utils/error';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -24,10 +25,9 @@ export default function RegisterPage() {
       const response = await api.post('/auth/register', { fullName: name, email, password });
       toast.success(response.data.message || 'Đăng ký thành công! Vui lòng đăng nhập.');
       navigate('/login');
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại';
-      toast.error(msg);
+      toast.error(getErrorMessage(error, 'Đăng ký thất bại, vui lòng thử lại'));
     } finally {
       setIsLoading(false);
     }

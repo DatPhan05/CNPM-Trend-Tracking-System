@@ -1,4 +1,4 @@
-import { BarChart3, LineChart, PieChart, Search, Bookmark, BellRing } from 'lucide-react';
+import { BarChart3, Search, BookOpen, Users, TrendingUp, Sparkles, Database, FileText, LineChart, Bookmark } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 const features = [
@@ -67,7 +67,7 @@ export default function FeaturesSection() {
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.description}</p>
-                
+
                 {/* Decorative element */}
                 <div className="absolute -right-10 -bottom-10 h-32 w-32 rounded-full blur-3xl transition-all group-hover:bg-primary/20" />
               </div>

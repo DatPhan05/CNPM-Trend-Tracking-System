@@ -141,7 +141,9 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
         total,
         page,
         limit,
-        totalPages
+        totalPages,
+        source: req.query.openAlexFallback ? "local-fallback" : "local",
+        warning: req.query.openAlexFallback as string | undefined
       }
     });
   } catch (error: any) {
@@ -304,8 +306,14 @@ export const searchPapers = async (req: Request, res: Response): Promise<void> =
     const limit = parseInt(req.query.limit as string, 10) || 10;
 
     // Log disabled for production: console.log(`🔍 Searching OpenAlex for keyword: "${keyword}"`);
-    const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(keyword)}&page=${page}&per-page=${limit}`;
-    const response = await axios.get(openAlexUrl, {
+    const response = await axios.get("https://api.openalex.org/works", {
+      params: {
+        search: keyword || "machine learning",
+        page,
+        "per-page": limit,
+        mailto: "admin@trendtracking.com",
+      },
+      timeout: 12000,
       headers: { "User-Agent": "ScientificJournalTrendTracker/1.0 (mailto:admin@trendtracking.com)" }
     });
 
@@ -331,11 +339,25 @@ export const searchPapers = async (req: Request, res: Response): Promise<void> =
         total,
         page,
         limit,
-        totalPages
+        totalPages,
+        source: "openalex"
       } 
     });
   } catch (error: any) {
-    console.error("❌ searchPapers error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    const status = error?.response?.status;
+    const openAlexMessage = error?.response?.data?.message || error?.message || "OpenAlex is temporarily unavailable";
+
+    if (status === 429 || status === 503 || error?.code === "ECONNABORTED") {
+      console.warn("OpenAlex unavailable, falling back to local database:", openAlexMessage);
+      (req.query as any).openAlexFallback =
+        "OpenAlex đang giới hạn truy cập tạm thời, hệ thống đang hiển thị dữ liệu mẫu trong cơ sở dữ liệu.";
+      return getPapers(req, res);
+    }
+
+    console.error("searchPapers error:", error);
+    res.status(502).json({
+      success: false,
+      message: "Không thể tải dữ liệu từ OpenAlex. Vui lòng thử lại sau.",
+    });
   }
 };

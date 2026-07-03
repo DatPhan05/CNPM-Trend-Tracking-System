@@ -31,12 +31,12 @@
     ]
   },
   "include": [
-    "backend/**/*",
+    "**/*",
     "prisma.config.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "frontend"
+    "../frontend"
   ]
 }

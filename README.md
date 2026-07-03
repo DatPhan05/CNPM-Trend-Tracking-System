@@ -10,7 +10,7 @@
 - **Frontend**: React, TypeScript, Tailwind CSS, Recharts (vẽ biểu đồ), Lucide Icons, Axios.
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM, Swagger OpenAPI.
 - **Cơ sở dữ liệu**: PostgreSQL.
-- **DevOps/Hạ tầng**: Docker, Docker Compose, NGINX, Jenkins CI/CD Pipeline.
+- **DevOps/Hạ tầng**: Docker, Docker Compose, NGINX.
 
 ---
 
@@ -169,35 +169,6 @@ Các dịch vụ sẽ chạy tại các cổng:
 
 ---
 
-## ⚙️ Cấu hình CI/CD Jenkins Pipeline
-
-Dự án đi kèm file `Jenkinsfile` chứa pipeline tự động hóa gồm 7 Stages:
-1. **Checkout**: Tải mã nguồn từ Github/Gitlab.
-2. **Install Dependencies**: Cài đặt node_modules.
-3. **Lint**: Kiểm tra lỗi cú pháp mã nguồn song song (`tsc --noEmit` và ESLint).
-4. **Test**: Chạy Jest unit tests.
-5. **Build Docker**: Build image với tag `${BUILD_NUMBER}`.
-6. **Deploy**: Restart services bằng docker compose.
-7. **Health Check**: Ping cổng `80` đảm bảo NGINX hoạt động tốt.
-
-### 📧 Hướng dẫn cấu hình gửi email thông báo từ Jenkins (SMTP)
-Khi build thành công hoặc thất bại, Jenkins pipeline sẽ tự động gửi email thông báo. Để tính năng này hoạt động, quản trị viên cần cấu hình SMTP Server trên Jenkins như sau:
-
-1. Truy cập trang quản trị Jenkins: **Jenkins Dashboard** → **Manage Jenkins** → **System** (hoặc **Configure System** trên phiên bản cũ).
-2. Cuộn xuống phần **E-mail Notification** (ở cuối trang):
-   - **SMTP server**: Nhập SMTP server của dịch vụ email (ví dụ: `smtp.gmail.com`).
-   - **Default user e-mail suffix**: Đuôi email mặc định (ví dụ: `@gmail.com`).
-   - Click vào **Advanced...** để cấu hình thêm:
-     - Tích chọn **Use SMTP Authentication**.
-     - **User Name**: Địa chỉ email gửi (ví dụ: `your-email@gmail.com`).
-     - **Password**: Mật khẩu ứng dụng (App Password) sinh ra từ tài khoản email của bạn.
-     - Tích chọn **Use SSL** (nếu dùng cổng 465) hoặc TLS.
-     - **SMTP Port**: Cổng SMTP (ví dụ: `465` hoặc `587`).
-3. Cuộn tiếp xuống phần **Extended E-mail Notification** (đối với plugin Email Extension - khuyên dùng trong Jenkinsfile):
-   - Cấu hình tương tự các thông tin SMTP server, Port, Credentials như trên.
-4. Nhấn **Save** để lưu cấu hình.
-
----
 
 ## 📄 Tài liệu Dự án khác
 - [checklist.md](./CHECKLIST.md): Danh sách đầy đủ các task và trạng thái chi tiết của dự án.

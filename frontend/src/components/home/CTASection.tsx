@@ -1,7 +1,14 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CTASection() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading || isAuthenticated) {
+    return null;
+  }
+
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-primary/5" />

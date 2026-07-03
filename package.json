@@ -10,7 +10,7 @@
     "db:validate": "prisma validate",
     "db:seed": "npx tsx database/seeds/seed_data.ts",
     "scrape": "tsx backend/src/services/scraper.ts",
-    "test": "jest --runInBand",
+    "test": "jest --config backend/jest.config.js --runInBand",
     "frontend:dev": "npm run dev --prefix frontend",
     "frontend:build": "npm run build --prefix frontend",
     "frontend:start": "npm run start --prefix frontend",

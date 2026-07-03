@@ -14,18 +14,28 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Analytics
- *   description: Analytics & Statistics APIs
+ *   description: Aggregated analytics, charts, and report exports
  */
 
 /**
  * @swagger
  * /api/analytics/overview:
  *   get:
- *     summary: Lấy thống kê tổng quan (số lượng bài báo, tạp chí, tác giả)
+ *     summary: Get dashboard overview metrics
  *     tags: [Analytics]
  *     responses:
  *       200:
- *         description: Thống kê tổng quan
+ *         description: Overview metrics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AnalyticsOverviewResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/overview', getOverview);
 
@@ -33,22 +43,59 @@ router.get('/overview', getOverview);
  * @swagger
  * /api/analytics/trends:
  *   get:
- *     summary: Lấy xu hướng xuất bản theo thời gian
+ *     summary: Get trend metrics
  *     tags: [Analytics]
  *     responses:
  *       200:
- *         description: Dữ liệu biểu đồ xu hướng
+ *         description: Trend series and citation statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TrendPoint'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/trends', getTrends);
+
 /**
  * @swagger
  * /api/analytics/categories:
  *   get:
- *     summary: Lấy thống kê theo danh mục/chủ đề
+ *     summary: Get category breakdown
  *     tags: [Analytics]
  *     responses:
  *       200:
- *         description: Dữ liệu phân bổ danh mục
+ *         description: Category statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CategoryPoint'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/categories', getCategories);
 
@@ -56,11 +103,29 @@ router.get('/categories', getCategories);
  * @swagger
  * /api/analytics/top-authors:
  *   get:
- *     summary: Lấy danh sách các tác giả xuất bản nhiều nhất
+ *     summary: Get top authors
  *     tags: [Analytics]
  *     responses:
  *       200:
- *         description: Danh sách tác giả hàng đầu
+ *         description: Top authors list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TopAuthorPoint'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/top-authors', getTopAuthors);
 
@@ -68,16 +133,22 @@ router.get('/top-authors', getTopAuthors);
  * @swagger
  * /api/analytics/export/csv:
  *   get:
- *     summary: Xuất báo cáo dữ liệu dưới định dạng CSV
+ *     summary: Export analytics as CSV
  *     tags: [Analytics]
  *     responses:
  *       200:
- *         description: Trả về file CSV
+ *         description: CSV file download
  *         content:
  *           text/csv:
  *             schema:
  *               type: string
- *               format: binary
+ *               example: "Title,Year,Citations,Journal\nAttention Is All You Need,2017,4500,NIPS"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/export/csv', exportCsv);
 
@@ -85,16 +156,22 @@ router.get('/export/csv', exportCsv);
  * @swagger
  * /api/analytics/export/pdf:
  *   get:
- *     summary: Xuất báo cáo dữ liệu dưới định dạng PDF
+ *     summary: Export analytics as PDF
  *     tags: [Analytics]
  *     responses:
  *       200:
- *         description: Trả về file PDF
+ *         description: PDF file download
  *         content:
  *           application/pdf:
  *             schema:
  *               type: string
  *               format: binary
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/export/pdf', exportPdf);
 

@@ -1,25 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  BookOpen, 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Trash2, 
-  ExternalLink, 
-  Star, 
-  Bookmark, 
-  Search, 
+import {
+  BookOpen,
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Trash2,
+  ExternalLink,
+  Star,
+  Bookmark,
+  Search,
   ChevronRight,
   TrendingUp,
   Award,
-  BookOpenCheck
+  BookOpenCheck,
+  Download,
+  FileJson,
+  FileText,
+  ChevronDown
 } from 'lucide-react';
 import api from '@/api/api';
 import toast from 'react-hot-toast';
 import { cn } from '@/utils/cn';
 import { getErrorMessage } from '@/utils/error';
+import { exportToCsv, exportToJson } from '@/utils/export';
 
 interface Paper {
   id: string | number;
@@ -48,6 +53,19 @@ export default function DashboardPage() {
   const [loadingBookmarks, setLoadingBookmarks] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setExportOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const isLoggedIn = !!localStorage.getItem('access_token');
 
@@ -108,6 +126,25 @@ export default function DashboardPage() {
     const journalMatch = paper.journal && paper.journal.toLowerCase().includes(search);
     return titleMatch || authorMatch || journalMatch;
   });
+
+  const handleExportCsv = () => {
+    const data = filteredBookmarks.map(p => ({
+      title: p.title,
+      authors: p.authors.join('; '),
+      year: p.year,
+      journal: p.journal || '',
+      citations: p.citations,
+      tags: p.tags?.join('; ') || '',
+      abstract: p.abstract || '',
+    }));
+    exportToCsv(`bookmarks_${new Date().toISOString().slice(0, 10)}.csv`, data);
+    setExportOpen(false);
+  };
+
+  const handleExportJson = () => {
+    exportToJson(`bookmarks_${new Date().toISOString().slice(0, 10)}.json`, filteredBookmarks);
+    setExportOpen(false);
+  };
 
   if (loadingProfile || loadingBookmarks) {
     return (
@@ -228,16 +265,55 @@ export default function DashboardPage() {
                 Danh sách bài báo khoa học bạn quan tâm được đồng bộ thời gian thực
               </p>
             </div>
-            {/* Inner Search Box */}
-            <div className="relative max-w-xs w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Lọc tài liệu đã lưu..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-secondary/40 border border-border rounded-xl py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
-              />
+            <div className="flex items-center gap-2">
+              {/* Inner Search Box */}
+              <div className="relative max-w-xs w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Lọc tài liệu đã lưu..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-secondary/40 border border-border rounded-xl py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+                />
+              </div>
+
+              {/* Export Dropdown */}
+              {bookmarks.length > 0 && (
+                <div className="relative flex-shrink-0" ref={exportRef}>
+                  <button
+                    onClick={() => setExportOpen(prev => !prev)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-secondary/50 hover:bg-secondary border border-border rounded-xl transition-all hover:border-primary/40 text-foreground"
+                    title="Xuất báo cáo"
+                  >
+                    <Download className="h-4 w-4 text-primary" />
+                    <span className="hidden sm:inline">Xuất</span>
+                    <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform duration-200", exportOpen && "rotate-180")} />
+                  </button>
+
+                  {exportOpen && (
+                    <div className="absolute right-0 mt-2 w-44 bg-card border border-border rounded-xl shadow-xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="px-3 py-2 border-b border-border/60">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Định dạng xuất</p>
+                      </div>
+                      <button
+                        onClick={handleExportCsv}
+                        className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-foreground hover:bg-secondary/60 transition-colors"
+                      >
+                        <FileText className="h-4 w-4 text-emerald-500" />
+                        Xuất CSV
+                      </button>
+                      <button
+                        onClick={handleExportJson}
+                        className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-foreground hover:bg-secondary/60 transition-colors"
+                      >
+                        <FileJson className="h-4 w-4 text-blue-500" />
+                        Xuất JSON
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

@@ -14,10 +14,10 @@ Dưới đây là bảng phân rã chi tiết các đầu việc (Sub-tasks) tư
 | **[CNPM-4]** | **Task 1.2: Vẽ các sơ đồ UML cơ bản** | ✅ Hoàn thành | `diagrams/` |
 | **[CNPM-6]** | **Task 1.3: Thiết kế giao diện cơ bản (Wireframe/UI Design)** | ✅ Hoàn thành | `Figma/Design` |
 | **[CNPM-5]** | **Task 1.4: Khởi tạo source code cho Frontend và Backend** | ✅ Hoàn thành | Github Repo |
-| **[CNPM-7]** | **Task 1.5: Thiết lập quy trình CI/CD cơ bản và môi trường Database local** | ✅ Hoàn thành | `Jenkinsfile`, `.env` |
+| **[CNPM-7]** | **Task 1.5: Thiết lập quy trình CI/CD cơ bản và môi trường Database local** | ✅ Hoàn thành | `.env` |
 | | - Viết Dockerfile cho Backend, Frontend, NGINX | ✅ Hoàn thành | `Dockerfile` |
 | | - Thiết lập Docker Compose 3-tier | ✅ Hoàn thành | `docker-compose.yml` |
-| | - Viết pipeline CI/CD cơ bản với Jenkins | ✅ Hoàn thành | `Jenkinsfile` |
+| | - Viết pipeline CI/CD cơ bản | ✅ Hoàn thành | — |
 
 ---
 

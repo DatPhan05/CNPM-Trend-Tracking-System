@@ -27,6 +27,7 @@ export default function SearchPage() {
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [selectedJournals, setSelectedJournals] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<string>('relevance');
+  const [dataSource, setDataSource] = useState<'local' | 'openalex' | 'local-fallback'>('local');
   // Track which paper IDs are bookmarked by current user
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
@@ -54,11 +55,17 @@ export default function SearchPage() {
       });
       setPapers(response.data.data || response.data.papers || []);
       setTotalPages(response.data.meta?.totalPages || 1);
+      setDataSource(response.data.meta?.source || (mode === 'openalex' ? 'openalex' : 'local'));
       setCurrentPage(page);
       setHasSearched(true);
+      if (response.data.meta?.warning) {
+        toast(response.data.meta.warning, { icon: 'ℹ️' });
+      }
     } catch (error) {
       console.error('Failed to fetch papers', error);
+      toast.error(getErrorMessage(error, 'Không thể tải dữ liệu bài báo, vui lòng thử lại sau.'));
       setPapers([]);
+      setDataSource(mode === 'openalex' ? 'openalex' : 'local');
       setTotalPages(1);
     } finally {
       setIsSearching(false);
@@ -101,10 +108,9 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
-    if (mode === 'mock' || hasSearched) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchPapers(query, 1);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1);
+    fetchPapers(query, 1);
     fetchBookmarks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, selectedYears, selectedJournals, sortOption]);
@@ -370,10 +376,16 @@ export default function SearchPage() {
                      </p>
                   )}
 
-                  {mode === 'openalex' && (
+                  {dataSource === 'openalex' && (
                     <p className="mt-2 text-xs text-muted-foreground/80 flex items-center gap-1">
                       <BookOpen className="h-3 w-3" />
                       Được cung cấp bởi OpenAlex API
+                    </p>
+                  )}
+                  {dataSource === 'local-fallback' && (
+                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                      <Database className="h-3 w-3" />
+                      OpenAlex tạm thời giới hạn, đang hiển thị dữ liệu mẫu từ hệ thống
                     </p>
                   )}
 

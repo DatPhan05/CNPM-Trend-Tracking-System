@@ -14,17 +14,18 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy root package files
-COPY package.json package-lock.json tsconfig.json ./
+COPY package.json package-lock.json ./
+COPY backend/tsconfig.json ./
 COPY backend/prisma ./backend/prisma/
 
 # Install all dependencies (including devDependencies for TypeScript build)
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy backend source code
 COPY backend ./backend/
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN npx prisma generate --schema=./backend/prisma/schema.prisma
 
 # Build TypeScript → dist/
 RUN npx tsc --outDir dist
@@ -38,8 +39,8 @@ COPY package.json package-lock.json ./
 COPY backend/prisma ./backend/prisma/
 
 # Install production dependencies only
-RUN npm ci --omit=dev
-RUN npx prisma generate
+RUN npm ci --omit=dev --legacy-peer-deps
+RUN npx prisma generate --schema=./backend/prisma/schema.prisma
 
 # Copy compiled JS from builder stage
 COPY --from=builder /app/dist ./dist/

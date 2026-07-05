@@ -76,7 +76,8 @@
   },
   "prisma": {
     "seed": "npx tsx database/seeds/seed_data.ts",
-    "schema": "backend/prisma/schema.prisma"
+    "schema": "backend/prisma/schema.prisma",
+    "config": "backend/prisma.config.ts"
   },
   "workspaces": [
     "frontend"

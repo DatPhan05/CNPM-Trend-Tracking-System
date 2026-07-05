@@ -38,6 +38,43 @@ services:
       timeout: 5s
       retries: 5
 
+  # ---- Tier 3: Redis (Message Queue & Cache) ----
+  redis:
+    image: redis:7-alpine
+    container_name: scientific_trend_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Tier 3: Elasticsearch (Search Engine) ----
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: scientific_trend_elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - app-net
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ---- pgAdmin 4: Database Management UI ----
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -100,6 +137,7 @@ services:
 volumes:
   postgres_data:
   frontend_build:
+  elasticsearch_data:
 
 networks:
   app-net:

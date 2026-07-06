@@ -67,6 +67,9 @@ const swaggerSpec = swaggerJsdoc({
             fullName: { type: "string", example: "Admin User" },
             name: { type: "string", example: "Admin User" },
             email: { type: "string", format: "email", example: "admin@example.com" },
+            userName: { type: "string", description: "Ten dang nhap, admin dung 'admin', user thuong dung CCCD 12 so", example: "admin" },
+            identityUid: { type: "string", nullable: true, example: null },
+            schoolName: { type: "string", example: "Server Owner" },
             role: { type: "string", enum: ["ADMIN", "STUDENT", "RESEARCHER"], example: "ADMIN" },
             createdAt: { type: "string", format: "date-time" },
           },
@@ -77,14 +80,21 @@ const swaggerSpec = swaggerJsdoc({
           properties: {
             fullName: { type: "string", example: "Student User" },
             email: { type: "string", format: "email", example: "student@example.com" },
+            userName: { type: "string", description: "Ten dang nhap, mac dinh dung CCCD 12 so", example: "079200000003" },
+            identityUid: { type: "string", example: "079200000003" },
+            schoolName: { type: "string", example: "Dai hoc Quoc Gia" },
             password: { type: "string", minLength: 6, example: "admin123" },
           },
         },
         LoginRequest: {
           type: "object",
-          required: ["email", "password"],
+          required: ["identifier", "password"],
           properties: {
-            email: { type: "string", format: "email", example: "admin@admin.com" },
+            identifier: {
+              type: "string",
+              description: "Email, CCCD 12 so hoac 'admin' voi tai khoan quan tri",
+              example: "admin",
+            },
             password: { type: "string", example: "admin123" },
           },
         },

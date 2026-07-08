@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { authenticateToken } from '../middlewares/auth.middleware';
+import { authorizeRoles } from '../middlewares/role.middleware';
 import {
   getOverview,
   getTrends,
@@ -135,6 +137,8 @@ router.get('/top-authors', getTopAuthors);
  *   get:
  *     summary: Export analytics as CSV
  *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: CSV file download
@@ -150,7 +154,7 @@ router.get('/top-authors', getTopAuthors);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/export/csv', exportCsv);
+router.get('/export/csv', authenticateToken, authorizeRoles('ADMIN', 'RESEARCHER'), exportCsv);
 
 /**
  * @swagger
@@ -158,6 +162,8 @@ router.get('/export/csv', exportCsv);
  *   get:
  *     summary: Export analytics as PDF
  *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: PDF file download
@@ -173,6 +179,6 @@ router.get('/export/csv', exportCsv);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/export/pdf', exportPdf);
+router.get('/export/pdf', authenticateToken, authorizeRoles('ADMIN', 'RESEARCHER'), exportPdf);
 
 export default router;

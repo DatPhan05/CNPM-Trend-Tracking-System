@@ -68,3 +68,13 @@ Dưới đây là tiến độ cập nhật các Task từ file Jira của dự 
 *Trạng thái:* **TO DO**
 - [ ] **CNPM-39** | Task 3.6: Viết DOC
 - [ ] **CNPM-40** | Task 4.6: Viết DOC
+
+---
+
+## 🔍 Giai đoạn 8: Nâng cấp Engine Tìm kiếm & Crawler (PLAN 8)
+*Trạng thái:* **IN PROGRESS**
+- [x] **CNPM-41** | Task 8.1: Cấu hình Elasticsearch và Redis trong `docker-compose.yml`
+- [x] **CNPM-42** | Task 8.2: Xây dựng service `elasticsearch.service.ts` để đồng bộ dữ liệu PostgreSQL sang Elasticsearch
+- [x] **CNPM-43** | Task 8.3: Cập nhật API tìm kiếm bài báo để ưu tiên dùng Elasticsearch (Fuzzy Search)
+- [x] **CNPM-44** | Task 8.4: Thiết lập BullMQ Worker để xử lý Crawler dưới dạng Background Job
+- [ ] **CNPM-45** | Task 8.5: Kiểm thử thực tế hệ thống Queue ngầm và tìm kiếm Elasticsearch

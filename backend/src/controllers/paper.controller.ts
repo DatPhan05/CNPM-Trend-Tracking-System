@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../helpers/prisma";
 import axios from "axios";
+import { searchPapersES } from "../services/elasticsearch.service";
 
 // Helper function to reconstruct OpenAlex abstract
 function reconstructAbstract(invertedIndex: any): string {
@@ -27,14 +28,44 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
     const journalParam = req.query.journal as string;
     const sortParam = req.query.sort as string;
     
-    // Pagination parameters
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = parseInt(req.query.limit as string, 10) || 10;
     const skip = (page - 1) * limit;
 
+    // 🌟 Ưu tiên dùng Elasticsearch nếu có tìm kiếm từ khóa và không có bộ lọc phức tạp
+    if (keyword && !yearParam && !journalParam && !authorParam) {
+      const esResult = await searchPapersES(keyword, page, limit);
+      if (esResult && esResult.papers.length > 0) {
+        const mappedPapers = esResult.papers.map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          authors: p.authors || [],
+          year: p.publicationYear || 2026,
+          journal: p.journal || "Local Database",
+          citations: p.citationCount || 0,
+          tags: p.keywords || [],
+          abstract: p.abstract || "",
+        }));
+
+        res.json({
+          success: true,
+          message: "Get papers successfully via Elasticsearch 🚀",
+          data: mappedPapers,
+          meta: {
+            total: esResult.total,
+            page,
+            limit,
+            totalPages: esResult.totalPages,
+            source: "elasticsearch"
+          }
+        });
+        return; // Kết thúc sớm
+      }
+    }
+
     const whereClause: any = {};
 
-    // 1. Text Search across Title and Abstract
+    // 1. Text Search across Title and Abstract (Fallback)
     if (keyword) {
       whereClause.OR = [
         { title: { contains: keyword, mode: "insensitive" } },
@@ -51,7 +82,7 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
       ];
     }
 
-    // 2. Year Filter (Comma-separated array, e.g. "2024,2023,older")
+    // 2. Year Filter
     if (yearParam) {
       const yearValues = yearParam.split(',').map(y => y.trim());
       const specificYears = yearValues.map(y => parseInt(y, 10)).filter(y => !isNaN(y));
@@ -109,10 +140,8 @@ export const getPapers = async (req: Request, res: Response): Promise<void> => {
             },
           },
         },
-        // 5. Sorting
         orderBy: (() => {
           if (sortParam === "newest") return { publicationYear: "desc" };
-          // For relevance, we fallback to citations since full-text relevance is complex
           return { citationCount: "desc" };
         })(),
         skip,

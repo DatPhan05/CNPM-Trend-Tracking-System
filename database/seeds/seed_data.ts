@@ -25,6 +25,8 @@ async function main() {
     data: {
       fullName: "admintest",
       email: "admin@admin.com",
+      userName: "admin",
+      schoolName: "Server Owner",
       password: defaultPassword,
       role: UserRole.ADMIN,
     },
@@ -34,6 +36,9 @@ async function main() {
     data: {
       fullName: "researchertest",
       email: "researcher@gmail.com",
+      userName: "079200000002",
+      identityUid: "079200000002",
+      schoolName: "Đại học Bách Khoa",
       password: defaultPassword,
       role: UserRole.RESEARCHER,
     },
@@ -43,6 +48,9 @@ async function main() {
     data: {
       fullName: "studenttest",
       email: "student@gmail.com",
+      userName: "079200000003",
+      identityUid: "079200000003",
+      schoolName: "Đại học Quốc Gia",
       password: defaultPassword,
       role: UserRole.STUDENT,
     },

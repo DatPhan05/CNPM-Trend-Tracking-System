@@ -13,6 +13,9 @@ export const getUsers = async (req: Request, res: Response) => {
         id: true,
         fullName: true,
         email: true,
+        userName: true,
+        identityUid: true,
+        schoolName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -42,6 +45,9 @@ export const getUserById = async (req: Request, res: Response) => {
         id: true,
         fullName: true,
         email: true,
+        userName: true,
+        identityUid: true,
+        schoolName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -68,7 +74,7 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, userName, identityUid, schoolName } = req.body;
 
     if (!fullName || !email || !password) {
       return res.status(400).json({
@@ -82,13 +88,30 @@ export const createUser = async (req: Request, res: Response) => {
       });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    const identityValue = identityUid || userName;
+    const normalizedUserName = identityValue?.trim().toLowerCase();
+    const normalizedIdentityUid = identityValue?.trim().toUpperCase();
+    const isAdminShortcut = role === UserRole.ADMIN && identityValue?.trim().toLowerCase() === "admin";
+
+    if (identityValue && !/^\d{12}$/.test(identityValue.trim()) && !isAdminShortcut) {
+      return res.status(400).json({
+        message: "CCCD must contain exactly 12 digits",
+      });
+    }
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          ...(normalizedUserName ? [{ userName: normalizedUserName }] : []),
+          ...(normalizedIdentityUid ? [{ identityUid: normalizedIdentityUid }] : []),
+        ],
+      },
     });
 
     if (existingUser) {
       return res.status(409).json({
-        message: "Email already exists",
+        message: "Email, username or UID already exists",
       });
     }
 
@@ -98,6 +121,9 @@ export const createUser = async (req: Request, res: Response) => {
       data: {
         fullName,
         email,
+        userName: normalizedUserName,
+        identityUid: isAdminShortcut ? null : normalizedIdentityUid,
+        schoolName: schoolName?.trim() || null,
         password: hashedPassword,
         role: role || UserRole.STUDENT,
       },
@@ -105,6 +131,9 @@ export const createUser = async (req: Request, res: Response) => {
         id: true,
         fullName: true,
         email: true,
+        userName: true,
+        identityUid: true,
+        schoolName: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -126,7 +155,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, userName, identityUid, schoolName } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { id },
@@ -147,12 +176,29 @@ export const updateUser = async (req: Request, res: Response) => {
     const updateData: {
       fullName?: string;
       email?: string;
+      userName?: string | null;
+      identityUid?: string | null;
+      schoolName?: string | null;
       password?: string;
       role?: UserRole;
     } = {};
 
     if (fullName) updateData.fullName = fullName;
     if (email) updateData.email = email;
+    if (userName !== undefined || identityUid !== undefined) {
+      const identityValue = identityUid || userName;
+      const effectiveRole = role || existingUser.role;
+      const isAdminShortcut = effectiveRole === UserRole.ADMIN && identityValue?.trim().toLowerCase() === "admin";
+
+      if (identityValue && !/^\d{12}$/.test(identityValue.trim()) && !isAdminShortcut) {
+        return res.status(400).json({
+          message: "CCCD must contain exactly 12 digits",
+        });
+      }
+      updateData.userName = identityValue ? identityValue.trim().toLowerCase() : null;
+      updateData.identityUid = identityValue && !isAdminShortcut ? identityValue.trim().toUpperCase() : null;
+    }
+    if (schoolName !== undefined) updateData.schoolName = schoolName ? schoolName.trim() : null;
     if (role) updateData.role = role;
     if (password) updateData.password = await bcrypt.hash(password, 10);
 
@@ -163,6 +209,9 @@ export const updateUser = async (req: Request, res: Response) => {
         id: true,
         fullName: true,
         email: true,
+        userName: true,
+        identityUid: true,
+        schoolName: true,
         role: true,
         createdAt: true,
         updatedAt: true,

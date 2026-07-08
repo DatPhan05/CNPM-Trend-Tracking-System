@@ -4,6 +4,19 @@ export const registerSchema = z.object({
   fullName: z.string().min(2, "fullName must be at least 2 characters").max(100),
   name: z.string().min(2).max(100).optional(), // alias for fullName
   email: z.string().email("Invalid email format"),
+  userName: z
+    .string()
+    .trim()
+    .min(3, "userName must be at least 3 characters")
+    .max(32)
+    .regex(/^[a-zA-Z0-9._-]+$/, "userName can only contain letters, numbers, dots, underscores and hyphens")
+    .optional(),
+  identityUid: z
+    .string()
+    .trim()
+    .regex(/^\d{12}$/, "CCCD must contain exactly 12 digits")
+    .optional(),
+  schoolName: z.string().trim().max(150).optional(),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -11,8 +24,17 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: z.string().email("Invalid email format").optional(),
+  userName: z.string().trim().min(1).optional(),
+  identityUid: z.string().trim().min(1).optional(),
+  identifier: z.string().trim().min(1).optional(),
   password: z.string().min(1, "Password is required"),
+}).refine((data) => data.email || data.userName || data.identityUid || data.identifier, {
+  message: "email, userName, identityUid or identifier is required",
+});
+
+export const googleLoginSchema = z.object({
+  credential: z.string().min(1, "Google credential is required"),
 });
 
 export const refreshTokenSchema = z.object({

@@ -78,8 +78,6 @@ export const initWorker = () => {
         // Lấy lại data với relations để index lên Elasticsearch
         const fullPaper = await prisma.paper.findUnique({
           where: { id: paper.id },
- include: { journal: true, authors: { include: { author: true } }, keywords: { include: { keyword: true } } }
-=======
           include: { journal: true, paperAuthors: { include: { author: true } }, paperKeywords: { include: { keyword: true } } }
         });
         
@@ -99,8 +97,6 @@ export const initWorker = () => {
   }, { connection: connection as any });
 
   worker.on('completed', job => {
-console.log(`[Worker] Job ${job?.id} completed successfully.`);
-=======
     console.log(`[Worker] Job ${job.id} completed successfully.`);
   });
 

@@ -114,16 +114,6 @@ npm run db:generate
 npm run db:seed
 ```
 
-Tài khoản mẫu sau khi seed:
-
-| Vai trò | Email | Tên đăng nhập / CCCD | Mật khẩu |
-|---|---|---|---|
-| Admin | admin@admin.com | admin | admin123 |
-| Researcher | researcher@gmail.com | 079200000002 | admin123 |
-| Student | student@gmail.com | 079200000003 | admin123 |
-
-Trang đăng nhập hỗ trợ nhập "Email hoặc CCCD" cùng mật khẩu. Riêng tài khoản Admin mẫu có thể nhập "admin".
-
 ### 4. Chạy hệ thống ở chế độ Development
 Chạy cả backend và frontend đồng thời:
 ```bash

@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { getMe, login, register, refreshToken, updateProfile, changePassword, forgotPassword, googleLogin } from "../controllers/auth.controller";
+import { getMe, login, register, refreshToken, updateProfile, changePassword, forgotPassword } from "../controllers/auth.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { validateBody } from "../middlewares/validate.middleware";
-import { loginSchema, refreshTokenSchema, registerSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, googleLoginSchema } from "../validators/validation.schemas";
+import { loginSchema, refreshTokenSchema, registerSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema } from "../validators/validation.schemas";
 
 const router = Router();
 
@@ -81,38 +81,6 @@ router.post("/register", validateBody(registerSchema), register);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/login", validateBody(loginSchema), login);
-
-/**
- * @swagger
- * /api/auth/google:
- *   post:
- *     summary: Login or create user from Google credential
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - credential
- *             properties:
- *               credential:
- *                 type: string
- *                 description: Google ID token returned by Google Identity Services
- *     responses:
- *       200:
- *         description: Google login successfully and temporary password sent by email
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AuthResponse'
- *       400:
- *         $ref: '#/components/responses/ValidationError'
- *       500:
- *         description: Google or SMTP configuration error
- */
-router.post("/google", validateBody(googleLoginSchema), googleLogin);
 
 /**
  * @swagger

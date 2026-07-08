@@ -4,9 +4,6 @@ import { jwtDecode } from 'jwt-decode';
 interface UserPayload {
   id: number;
   email: string;
-  userName?: string;
-  identityUid?: string;
-  schoolName?: string;
   role: string;
   fullName: string;
   iat: number;
@@ -18,9 +15,6 @@ interface AuthState {
   user: {
     id: number;
     email: string;
-    userName?: string;
-    identityUid?: string;
-    schoolName?: string;
     role: string;
     fullName: string;
   } | null;
@@ -30,9 +24,6 @@ interface AuthState {
 interface UserData {
   id: number;
   email: string;
-  userName?: string;
-  identityUid?: string;
-  schoolName?: string;
   role: string;
   fullName: string;
 }
@@ -123,9 +114,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user: {
         id: userData.id,
         email: userData.email,
-        userName: userData.userName,
-        identityUid: userData.identityUid,
-        schoolName: userData.schoolName,
         role: userData.role.toUpperCase(),
         fullName: userData.fullName,
       },

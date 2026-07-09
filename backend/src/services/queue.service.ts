@@ -13,7 +13,7 @@ export const initWorker = () => {
   const worker = new Worker('crawler', async job => {
     const { keyword, limit } = job.data;
     console.log(`[Worker] Started crawling for keyword: "${keyword}", limit: ${limit}`);
-    
+
     try {
       const works = await fetchOpenAlexWorks(keyword, limit);
       let savedCount = 0;
@@ -78,11 +78,9 @@ export const initWorker = () => {
         // Lấy lại data với relations để index lên Elasticsearch
         const fullPaper = await prisma.paper.findUnique({
           where: { id: paper.id },
- include: { journal: true, authors: { include: { author: true } }, keywords: { include: { keyword: true } } }
-=======
-          include: { journal: true, paperAuthors: { include: { author: true } }, paperKeywords: { include: { keyword: true } } }
+          include: { journal: true, authors: { include: { author: true } }, keywords: { include: { keyword: true } } }
         });
-        
+
         if (fullPaper) {
           await indexPaper(fullPaper);
         }
@@ -99,14 +97,13 @@ export const initWorker = () => {
   }, { connection: connection as any });
 
   worker.on('completed', job => {
-console.log(`[Worker] Job ${job?.id} completed successfully.`);
-=======
+    console.log(`[Worker] Job ${job?.id} completed successfully.`);
     console.log(`[Worker] Job ${job.id} completed successfully.`);
   });
 
   worker.on('failed', (job, err) => {
     console.error(`[Worker] Job ${job?.id} failed with error:`, err);
   });
-  
+
   console.log('[Worker] BullMQ Worker initialized.');
 };
